@@ -1,0 +1,12 @@
+---
+exclusions:
+  template-job-rule:
+    reason: Jobs are not set to multi in our case.
+  template-instance-rule:
+    reason: We use instance variable as a single-select.
+  panel-datasource-rule:
+    reason: Using a datasource for each panel.
+  panel-title-description-rule:
+    reason: TODO(adinhodovic)
+  target-instance-rule:
+  target-rate-interval-rule:

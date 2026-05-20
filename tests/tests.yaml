@@ -1,0 +1,191 @@
+# yamllint disable rule:line-length
+---
+rule_files:
+  - ../prometheus_alerts.yaml
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'vault_core_unsealed{job="vault", instance="vault-0:8200"}'
+        values: "0+0x10"
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: VaultSealed
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: critical
+            exp_annotations:
+              summary: "Vault is sealed."
+              description: "Vault instance vault-0:8200 is sealed."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance=vault-0:8200"
+  - interval: 1m
+    input_series:
+      - series: 'up{job="vault", instance="vault-0:8200"}'
+        values: "0+0x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultDown
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: critical
+            exp_annotations:
+              summary: "Vault is down."
+              description: "Vault instance vault-0:8200 is down."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance=vault-0:8200"
+  - interval: 1m
+    input_series:
+      - series: 'vault_token_create_count{job="vault", instance="vault-0:8200"}'
+        values: "0+10x20"
+      - series: 'vault_token_store_count{job="vault", instance="vault-0:8200"}'
+        values: "0+5x20"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultTooManyPendingTokens
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: warning
+            exp_annotations:
+              summary: "Vault has too many pending tokens."
+              description: "More than 0 tokens created but not yet stored on instance vault-0:8200 the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance=vault-0:8200"
+  - interval: 1m
+    input_series:
+      - series: 'vault_token_count_by_ttl{job="vault", instance="vault-0:8200", creation_ttl="+Inf"}'
+        values: "5+0x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultTooManyInfinityTokens
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              creation_ttl: "+Inf"
+              severity: warning
+            exp_annotations:
+              summary: "Vault has too many non-expiring tokens."
+              description: "More than 3 non-expiring tokens on instance vault-0:8200 for the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance=vault-0:8200"
+  - interval: 1m
+    input_series:
+      - series: 'vault_core_unsealed{job="vault", instance="vault-0:8200", cluster="vault-cluster"}'
+        values: "0+0x10"
+      - series: 'vault_core_unsealed{job="vault", instance="vault-1:8200", cluster="vault-cluster"}'
+        values: "0+0x10"
+      - series: 'vault_core_unsealed{job="vault", instance="vault-2:8200", cluster="vault-cluster"}'
+        values: "1+0x10"
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: VaultClusterHealth
+        exp_alerts:
+          - exp_labels:
+              cluster: vault-cluster
+              severity: critical
+            exp_annotations:
+              summary: "Vault cluster is not healthy."
+              description: "Vault cluster is not healthy: only 33.33% of nodes are unsealed."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-exported_cluster=vault-cluster"
+  - interval: 1m
+    input_series:
+      - series: 'vault_autopilot_healthy{job="vault", instance="vault-0:8200"}'
+        values: "0+0x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultAutopilotUnhealthy
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: critical
+            exp_annotations:
+              summary: "Vault Autopilot is unhealthy."
+              description: "Vault Autopilot is unhealthy on instance vault-0:8200 for the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance=vault-0:8200"
+  - interval: 1m
+    input_series:
+      - series: 'vault_autopilot_node_healthy{job="vault", node_id="node-1"}'
+        values: "0+0x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultAutopilotNodeUnhealthy
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              node_id: node-1
+              severity: warning
+            exp_annotations:
+              summary: "Vault Autopilot node is unhealthy."
+              description: "Vault Autopilot node node-1 is unhealthy for the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview"
+  - interval: 1m
+    input_series:
+      - series: 'vault_core_active{job="vault", cluster="vault-cluster"}'
+        values: "0+0x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultNoActiveNode
+        exp_alerts:
+          - exp_labels:
+              cluster: vault-cluster
+              severity: critical
+            exp_annotations:
+              summary: "Vault has no active node."
+              description: "Vault cluster vault-cluster has no active node for the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-exported_cluster=vault-cluster"
+  - interval: 1m
+    input_series:
+      - series: 'vault_core_response_status_code{job="vault", instance="vault-0:8200", type="2xx", code="200"}'
+        values: "0+900x10"
+      - series: 'vault_core_response_status_code{job="vault", instance="vault-0:8200", type="5xx", code="500"}'
+        values: "0+100x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultHighResponseErrorRate
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: warning
+            exp_annotations:
+              summary: "Vault has a high response error rate."
+              description: "More than 5% Vault responses are errors on instance vault-0:8200 the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance=vault-0:8200"
+  - interval: 1m
+    input_series:
+      - series: 'vault_raft_storage_stats_fsm_pending{job="vault", peer_id="peer-1"}'
+        values: "101+0x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultRaftFSMPendingHigh
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              peer_id: peer-1
+              severity: warning
+            exp_annotations:
+              summary: "Vault Raft FSM pending operations are high."
+              description: "Vault Raft peer peer-1 has more than 100 pending FSM operations for the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview"
+  - interval: 1m
+    input_series:
+      - series: 'vault_audit_log_request_failure{job="vault", instance="vault-0:8200"}'
+        values: "0+10x10"
+      - series: 'vault_audit_log_response_failure{job="vault", instance="vault-0:8200"}'
+        values: "0+0x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultAuditFailures
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: warning
+            exp_annotations:
+              summary: "Vault audit log failures detected."
+              description: "Vault audit log failures are occurring on instance vault-0:8200 for the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance=vault-0:8200"
