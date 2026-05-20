@@ -61,7 +61,7 @@ local grid = g.util.grid;
         ||| % defaultFilters,
 
         responseRateByCode: |||
-          sum by (code, type) (
+          sum by (type) (
             rate(
               vault_core_response_status_code{
                 %(default)s
@@ -614,7 +614,7 @@ local grid = g.util.grid;
             'Response Rate by Code',
             'reqps',
             queries.responseRateByCode,
-            '{{ code }} {{ type }}',
+            '{{ type }}',
             stack='normal',
           ),
 
@@ -835,6 +835,7 @@ local grid = g.util.grid;
             'short',
             queries.availableTokens,
             'Tokens',
+            stack='normal',
           ),
 
         pendingTokensTimeSeries:
@@ -843,14 +844,16 @@ local grid = g.util.grid;
             'short',
             queries.pendingTokens,
             'Pending',
+            stack='normal',
           ),
 
-        tokensByAuthPieChart:
-          mixinUtils.dashboards.pieChartPanel(
+        tokensByAuthTimeSeries:
+          mixinUtils.dashboards.timeSeriesPanel(
             'Tokens by Auth Method',
             'short',
             queries.tokensByAuth,
             '{{ auth_method }}',
+            stack='normal',
           ),
 
         tokenOperationsTimeSeries:
@@ -862,6 +865,7 @@ local grid = g.util.grid;
               { expr: queries.tokenStoreRate, legend: 'Store' },
               { expr: queries.tokenLookupRate, legend: 'Lookup' },
             ],
+            stack='normal',
           ),
 
         // Audit
@@ -1002,13 +1006,13 @@ local grid = g.util.grid;
             panels.responseErrorRateTimeSeries,
           ],
           panelWidth=8,
-          panelHeight=8,
+          panelHeight=6,
           startY=6
         ) +
         [
           row.new('Mounts') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(14) +
+          row.gridPos.withY(12) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1018,13 +1022,13 @@ local grid = g.util.grid;
             panels.mountTableSizeByTypePieChart,
           ],
           panelWidth=12,
-          panelHeight=8,
-          startY=15
+          panelHeight=6,
+          startY=13
         ) +
         [
           row.new('Cluster') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(23) +
+          row.gridPos.withY(19) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1045,12 +1049,12 @@ local grid = g.util.grid;
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=24
+          startY=20
         ) +
         [
           row.new('Raft Storage') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(72) +
+          row.gridPos.withY(68) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1063,12 +1067,12 @@ local grid = g.util.grid;
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=73
+          startY=69
         ) +
         [
           row.new('Requests') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(89) +
+          row.gridPos.withY(85) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1079,12 +1083,12 @@ local grid = g.util.grid;
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=90
+          startY=86
         ) +
         [
           row.new('Tokens') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(98) +
+          row.gridPos.withY(94) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1092,17 +1096,17 @@ local grid = g.util.grid;
           [
             panels.availableTokensTimeSeries,
             panels.pendingTokensTimeSeries,
-            panels.tokensByAuthPieChart,
+            panels.tokensByAuthTimeSeries,
             panels.tokenOperationsTimeSeries,
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=99
+          startY=95
         ) +
         [
           row.new('Audit') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(115) +
+          row.gridPos.withY(111) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1113,12 +1117,12 @@ local grid = g.util.grid;
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=116
+          startY=112
         ) +
         [
           row.new('Runtime') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(124) +
+          row.gridPos.withY(120) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1135,15 +1139,15 @@ local grid = g.util.grid;
             panels.cacheHitRateTimeSeries,
           ],
           panelWidth=8,
-          panelHeight=8,
-          startY=125
+          panelHeight=6,
+          startY=121
         );
 
       mixinUtils.dashboards.bypassDashboardValidation +
       dashboard.new(
         'Vault / Overview',
       ) +
-      dashboard.withDescription('A dashboard that monitors Vault. It is created using the [vault-mixin](https://github.com/adinhodovic/vault-mixin).') +
+      dashboard.withDescription('A dashboard that monitors Vault. It is created using the [vault-mixin](https://github.com/adinhodovic/vault-mixin). For an in-depth view of Go runtime internals (CPU, memory, GC, scheduling, contention, file descriptor pressure), pair this dashboard with the [Go / Overview dashboard](https://grafana.com/grafana/dashboards/25063-go-overview/) from the [go-mixin](https://github.com/adinhodovic/go-mixin) project.') +
       dashboard.withUid($._config.dashboardIds[dashboardName]) +
       dashboard.withTags($._config.tags) +
       dashboard.withTimezone('utc') +

@@ -68,13 +68,26 @@ spec:
       scheme: http
       interval: 30s
       scrapeTimeout: 10s
+      metricRelabelings:
+        # Rename Vault's built-in `cluster` label (set to its internal
+        # cluster_name) to `exported_cluster` so it does not collide with the
+        # Prometheus external `cluster` label used by other mixins.
+        - sourceLabels: [cluster]
+          targetLabel: exported_cluster
+          action: replace
+        - regex: ^cluster$
+          action: labeldrop
 ```
+
+## Runtime metrics
+
+The Runtime row on the overview dashboard surfaces just the high-signal Go runtime metrics (memory, goroutines, GC, allocations, process I/O, cache hit rate). For an in-depth view of Go runtime internals (CPU, memory, GC, scheduling, contention, file descriptor pressure), pair this dashboard with the [Go / Overview dashboard](https://grafana.com/grafana/dashboards/25063-go-overview/) from the [go-mixin](https://github.com/adinhodovic/go-mixin) project.
 
 ## Multi-cluster setups
 
 Vault emits a built-in `cluster` label set to its internal `cluster_name`. When the Prometheus scrape config injects its own `cluster` external label (the typical multi-cluster mixin pattern), Prometheus renames Vault's built-in label to `exported_cluster`.
 
-The mixin handles this automatically: `vaultClusterLabel` defaults to `exported_cluster` when `showMultiCluster` is `true`, and to `cluster` otherwise. Override `_config.vaultClusterLabel` if your scrape config relabels differently (for example via `honor_labels: true` or `metric_relabel_configs`).
+The mixin handles this automatically: `vaultClusterLabel` defaults to `exported_cluster` when `showMultiCluster` is `true`, and to `cluster` otherwise. Override `_config.vaultClusterLabel` if your scrape config relabels differently (for example via `honor_labels: true` or `metric_relabel_configs`). See the `metricRelabelings` block in the ServiceMonitor example above for a concrete relabel to `exported_cluster`.
 
 ## Alerts
 
