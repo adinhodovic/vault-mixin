@@ -70,21 +70,26 @@ local grid = g.util.grid;
           )
         ||| % defaultFilters,
 
-        responseErrorRate: |||
-          sum(
-            rate(
-              vault_core_response_status_code{
-                %(default)s,
-                type=~"4xx|5xx"
-              }[$__rate_interval]
-            )
-          )
-          /
-          sum(
-            rate(
-              vault_core_response_status_code{
-                %(default)s
-              }[$__rate_interval]
+        responseSuccessRate: |||
+          (
+            1 -
+            (
+              sum(
+                rate(
+                  vault_core_response_status_code{
+                    %(default)s,
+                    type="5xx"
+                  }[$__rate_interval]
+                )
+              )
+              /
+              sum(
+                rate(
+                  vault_core_response_status_code{
+                    %(default)s
+                  }[$__rate_interval]
+                )
+              )
             )
           )
           * 100
@@ -618,12 +623,12 @@ local grid = g.util.grid;
             stack='normal',
           ),
 
-        responseErrorRateTimeSeries:
+        responseSuccessRateTimeSeries:
           mixinUtils.dashboards.timeSeriesPanel(
-            'Response Error Rate',
+            'Response Success Rate',
             'percent',
-            queries.responseErrorRate,
-            'Error Rate',
+            queries.responseSuccessRate,
+            'Success Rate',
             min=0,
             max=100,
           ),
@@ -1003,7 +1008,7 @@ local grid = g.util.grid;
           [
             panels.responseRateByTypePieChart,
             panels.responseRateByCodeTimeSeries,
-            panels.responseErrorRateTimeSeries,
+            panels.responseSuccessRateTimeSeries,
           ],
           panelWidth=8,
           panelHeight=6,

@@ -40,19 +40,6 @@
         interval: '0m',
       },
 
-      down: {
-        enabled: true,
-        severity: 'critical',
-        interval: '5m',
-      },
-
-      tooManyPendingTokens: {
-        enabled: true,
-        severity: 'warning',
-        interval: '5m',
-        threshold: '0',  // pending tokens (create - store)
-      },
-
       tooManyInfinityTokens: {
         enabled: true,
         severity: 'warning',
@@ -60,22 +47,9 @@
         threshold: '3',  // number of tokens with creation_ttl="+Inf"
       },
 
-      clusterHealth: {
-        enabled: true,
-        severity: 'critical',
-        interval: '5m',
-        threshold: '0.5',  // fraction of unsealed nodes
-      },
-
       autopilotUnhealthy: {
         enabled: true,
         severity: 'critical',
-        interval: '5m',
-      },
-
-      autopilotNodeUnhealthy: {
-        enabled: true,
-        severity: 'warning',
         interval: '5m',
       },
 
@@ -85,12 +59,12 @@
         interval: '5m',
       },
 
-      highResponseErrorRate: {
+      lowResponseSuccessRate: {
         enabled: true,
         severity: 'warning',
         interval: '5m',
-        threshold: '5',  // percent
-        minErrors: '1',  // errors per second
+        threshold: '95',  // percent of non-5xx responses
+        minErrors: '1',  // 5xx responses per second
       },
 
       raftFSMPendingHigh: {

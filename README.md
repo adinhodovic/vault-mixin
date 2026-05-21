@@ -96,13 +96,9 @@ The mixin follows the [monitoring-mixins guidelines](https://github.com/monitori
 The following alerts are included:
 
 - `VaultSealed` — fires when a Vault instance is sealed.
-- `VaultDown` — fires when a Vault instance is unreachable.
-- `VaultTooManyPendingTokens` — fires when token creation outpaces storage.
 - `VaultTooManyInfinityTokens` — fires when too many tokens have an infinite TTL.
-- `VaultClusterHealth` — fires when a majority of cluster nodes are sealed.
 - `VaultAutopilotUnhealthy` — fires when Vault Autopilot reports the cluster as unhealthy.
-- `VaultAutopilotNodeUnhealthy` — fires when Vault Autopilot reports an unhealthy node.
 - `VaultNoActiveNode` — fires when no active Vault node is reported for a cluster.
-- `VaultHighResponseErrorRate` — fires when Vault returns too many 4xx or 5xx responses.
+- `VaultLowResponseSuccessRate` — fires when Vault returns too many 5xx responses.
 - `VaultRaftFSMPendingHigh` — fires when Raft FSM pending operations are high.
 - `VaultAuditFailures` — fires when audit request or response logging failures occur.

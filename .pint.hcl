@@ -7,28 +7,7 @@ rule {
 
 rule {
   match {
-    name = "VaultDown"
-  }
-  disable = ["promql/regexp"]
-}
-
-rule {
-  match {
-    name = "VaultTooManyPendingTokens"
-  }
-  disable = ["promql/regexp"]
-}
-
-rule {
-  match {
     name = "VaultTooManyInfinityTokens"
-  }
-  disable = ["promql/regexp"]
-}
-
-rule {
-  match {
-    name = "VaultClusterHealth"
   }
   disable = ["promql/regexp"]
 }
@@ -42,13 +21,6 @@ rule {
 
 rule {
   match {
-    name = "VaultAutopilotNodeUnhealthy"
-  }
-  disable = ["promql/regexp"]
-}
-
-rule {
-  match {
     name = "VaultNoActiveNode"
   }
   disable = ["promql/regexp"]
@@ -56,7 +28,7 @@ rule {
 
 rule {
   match {
-    name = "VaultHighResponseErrorRate"
+    name = "VaultLowResponseSuccessRate"
   }
   disable = ["promql/regexp"]
 }

@@ -24,53 +24,6 @@
               dashboard_url: $._config.dashboardUrls['vault-overview'] + '?var-instance={{ $labels.instance }}' + clusterVariableQueryString,
             },
           },
-          if $._config.alerts.down.enabled then {
-            alert: 'VaultDown',
-            expr: |||
-              up{
-                %(vaultSelector)s
-              } == 0
-            ||| % $._config,
-            'for': $._config.alerts.down.interval,
-            labels: {
-              severity: $._config.alerts.down.severity,
-            },
-            annotations: {
-              summary: 'Vault is down.',
-              description: 'Vault instance {{ $labels.instance }} is down.',
-              dashboard_url: $._config.dashboardUrls['vault-overview'] + '?var-instance={{ $labels.instance }}' + clusterVariableQueryString,
-            },
-          },
-          if $._config.alerts.tooManyPendingTokens.enabled then {
-            alert: 'VaultTooManyPendingTokens',
-            expr: |||
-              avg(
-                vault_token_create_count{
-                  %(vaultSelector)s
-                }
-                -
-                vault_token_store_count{
-                  %(vaultSelector)s
-                }
-              ) by (%(groupLabels)s)
-              > %(threshold)s
-            ||| % (
-              $._config
-              {
-                threshold: $._config.alerts.tooManyPendingTokens.threshold,
-                groupLabels: instanceGroupLabels,
-              }
-            ),
-            'for': $._config.alerts.tooManyPendingTokens.interval,
-            labels: {
-              severity: $._config.alerts.tooManyPendingTokens.severity,
-            },
-            annotations: {
-              summary: 'Vault has too many pending tokens.',
-              description: 'More than %(threshold)s tokens created but not yet stored on instance {{ $labels.instance }} the past %(interval)s.' % $._config.alerts.tooManyPendingTokens,
-              dashboard_url: $._config.dashboardUrls['vault-overview'] + '?var-instance={{ $labels.instance }}' + clusterVariableQueryString,
-            },
-          },
           if $._config.alerts.tooManyInfinityTokens.enabled then {
             alert: 'VaultTooManyInfinityTokens',
             expr: |||
@@ -95,38 +48,6 @@
               dashboard_url: $._config.dashboardUrls['vault-overview'] + '?var-instance={{ $labels.instance }}' + clusterVariableQueryString,
             },
           },
-          if $._config.alerts.clusterHealth.enabled then {
-            alert: 'VaultClusterHealth',
-            expr: |||
-              sum(
-                vault_core_unsealed{
-                  %(vaultSelector)s
-                }
-              ) by (%(groupLabels)s)
-              /
-              count(
-                vault_core_unsealed{
-                  %(vaultSelector)s
-                }
-              ) by (%(groupLabels)s)
-              <= %(threshold)s
-            ||| % (
-              $._config
-              {
-                threshold: $._config.alerts.clusterHealth.threshold,
-                groupLabels: vaultClusterGroupLabels,
-              }
-            ),
-            'for': $._config.alerts.clusterHealth.interval,
-            labels: {
-              severity: $._config.alerts.clusterHealth.severity,
-            },
-            annotations: {
-              summary: 'Vault cluster is not healthy.',
-              description: 'Vault cluster is not healthy: only {{ $value | humanizePercentage }} of nodes are unsealed.',
-              dashboard_url: $._config.dashboardUrls['vault-overview'] + ('?var-exported_cluster={{ $labels.%(vaultClusterLabel)s }}' % $._config) + clusterVariableQueryString,
-            },
-          },
           if $._config.alerts.autopilotUnhealthy.enabled then {
             alert: 'VaultAutopilotUnhealthy',
             expr: |||
@@ -145,23 +66,6 @@
               summary: 'Vault Autopilot is unhealthy.',
               description: 'Vault Autopilot is unhealthy on instance {{ $labels.instance }} for the past %(interval)s.' % $._config.alerts.autopilotUnhealthy,
               dashboard_url: $._config.dashboardUrls['vault-overview'] + '?var-instance={{ $labels.instance }}' + clusterVariableQueryString,
-            },
-          },
-          if $._config.alerts.autopilotNodeUnhealthy.enabled then {
-            alert: 'VaultAutopilotNodeUnhealthy',
-            expr: |||
-              vault_autopilot_node_healthy{
-                %(vaultSelector)s
-              } == 0
-            ||| % $._config,
-            'for': $._config.alerts.autopilotNodeUnhealthy.interval,
-            labels: {
-              severity: $._config.alerts.autopilotNodeUnhealthy.severity,
-            },
-            annotations: {
-              summary: 'Vault Autopilot node is unhealthy.',
-              description: 'Vault Autopilot node {{ $labels.node_id }} is unhealthy for the past %(interval)s.' % $._config.alerts.autopilotNodeUnhealthy,
-              dashboard_url: $._config.dashboardUrls['vault-overview'] + clusterVariableQueryString,
             },
           },
           if $._config.alerts.noActiveNode.enabled then {
@@ -184,34 +88,38 @@
               dashboard_url: $._config.dashboardUrls['vault-overview'] + ('?var-exported_cluster={{ $labels.%(vaultClusterLabel)s }}' % $._config) + clusterVariableQueryString,
             },
           },
-          if $._config.alerts.highResponseErrorRate.enabled then {
-            alert: 'VaultHighResponseErrorRate',
+          if $._config.alerts.lowResponseSuccessRate.enabled then {
+            alert: 'VaultLowResponseSuccessRate',
             expr: |||
               (
-                sum(
-                  rate(
-                    vault_core_response_status_code{
-                      %(vaultSelector)s,
-                      type=~"4xx|5xx"
-                    }[%(interval)s]
-                  )
-                ) by (%(groupLabels)s)
-                /
-                sum(
-                  rate(
-                    vault_core_response_status_code{
-                      %(vaultSelector)s
-                    }[%(interval)s]
-                  )
-                ) by (%(groupLabels)s)
+                1 -
+                (
+                  sum(
+                    rate(
+                      vault_core_response_status_code{
+                        %(vaultSelector)s,
+                        type="5xx"
+                      }[%(interval)s]
+                    )
+                  ) by (%(groupLabels)s)
+                  /
+                  sum(
+                    rate(
+                      vault_core_response_status_code{
+                        %(vaultSelector)s
+                      }[%(interval)s]
+                    )
+                  ) by (%(groupLabels)s)
+                )
+              )
                 * 100
-              ) > %(threshold)s
+              < %(threshold)s
               and
               sum(
                 rate(
                   vault_core_response_status_code{
                     %(vaultSelector)s,
-                    type=~"4xx|5xx"
+                    type="5xx"
                   }[%(interval)s]
                 )
               ) by (%(groupLabels)s)
@@ -219,19 +127,19 @@
             ||| % (
               $._config
               {
-                interval: $._config.alerts.highResponseErrorRate.interval,
-                threshold: $._config.alerts.highResponseErrorRate.threshold,
-                minErrors: $._config.alerts.highResponseErrorRate.minErrors,
+                interval: $._config.alerts.lowResponseSuccessRate.interval,
+                threshold: $._config.alerts.lowResponseSuccessRate.threshold,
+                minErrors: $._config.alerts.lowResponseSuccessRate.minErrors,
                 groupLabels: instanceGroupLabels,
               }
             ),
             'for': '1m',
             labels: {
-              severity: $._config.alerts.highResponseErrorRate.severity,
+              severity: $._config.alerts.lowResponseSuccessRate.severity,
             },
             annotations: {
-              summary: 'Vault has a high response error rate.',
-              description: 'More than %(threshold)s%% Vault responses are errors on instance {{ $labels.instance }} the past %(interval)s.' % $._config.alerts.highResponseErrorRate,
+              summary: 'Vault has a low response success rate.',
+              description: 'Less than %(threshold)s%% of Vault responses are non-5xx on instance {{ $labels.instance }} the past %(interval)s.' % $._config.alerts.lowResponseSuccessRate,
               dashboard_url: $._config.dashboardUrls['vault-overview'] + '?var-instance={{ $labels.instance }}' + clusterVariableQueryString,
             },
           },

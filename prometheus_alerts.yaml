@@ -13,37 +13,6 @@
     "for": "0m"
     "labels":
       "severity": "critical"
-  - "alert": "VaultDown"
-    "annotations":
-      "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance={{ $labels.instance }}"
-      "description": "Vault instance {{ $labels.instance }} is down."
-      "summary": "Vault is down."
-    "expr": |
-      up{
-        job=~".*vault.*"
-      } == 0
-    "for": "5m"
-    "labels":
-      "severity": "critical"
-  - "alert": "VaultTooManyPendingTokens"
-    "annotations":
-      "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance={{ $labels.instance }}"
-      "description": "More than 0 tokens created but not yet stored on instance {{ $labels.instance }} the past 5m."
-      "summary": "Vault has too many pending tokens."
-    "expr": |
-      avg(
-        vault_token_create_count{
-          job=~".*vault.*"
-        }
-        -
-        vault_token_store_count{
-          job=~".*vault.*"
-        }
-      ) by (job, instance)
-      > 0
-    "for": "5m"
-    "labels":
-      "severity": "warning"
   - "alert": "VaultTooManyInfinityTokens"
     "annotations":
       "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance={{ $labels.instance }}"
@@ -58,27 +27,6 @@
     "for": "5m"
     "labels":
       "severity": "warning"
-  - "alert": "VaultClusterHealth"
-    "annotations":
-      "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview?var-exported_cluster={{ $labels.cluster }}"
-      "description": "Vault cluster is not healthy: only {{ $value | humanizePercentage }} of nodes are unsealed."
-      "summary": "Vault cluster is not healthy."
-    "expr": |
-      sum(
-        vault_core_unsealed{
-          job=~".*vault.*"
-        }
-      ) by (cluster)
-      /
-      count(
-        vault_core_unsealed{
-          job=~".*vault.*"
-        }
-      ) by (cluster)
-      <= 0.5
-    "for": "5m"
-    "labels":
-      "severity": "critical"
   - "alert": "VaultAutopilotUnhealthy"
     "annotations":
       "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance={{ $labels.instance }}"
@@ -94,18 +42,6 @@
     "for": "5m"
     "labels":
       "severity": "critical"
-  - "alert": "VaultAutopilotNodeUnhealthy"
-    "annotations":
-      "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview"
-      "description": "Vault Autopilot node {{ $labels.node_id }} is unhealthy for the past 5m."
-      "summary": "Vault Autopilot node is unhealthy."
-    "expr": |
-      vault_autopilot_node_healthy{
-        job=~".*vault.*"
-      } == 0
-    "for": "5m"
-    "labels":
-      "severity": "warning"
   - "alert": "VaultNoActiveNode"
     "annotations":
       "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview?var-exported_cluster={{ $labels.cluster }}"
@@ -121,37 +57,41 @@
     "for": "5m"
     "labels":
       "severity": "critical"
-  - "alert": "VaultHighResponseErrorRate"
+  - "alert": "VaultLowResponseSuccessRate"
     "annotations":
       "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance={{ $labels.instance }}"
-      "description": "More than 5% Vault responses are errors on instance {{ $labels.instance }} the past 5m."
-      "summary": "Vault has a high response error rate."
+      "description": "Less than 95% of Vault responses are non-5xx on instance {{ $labels.instance }} the past 5m."
+      "summary": "Vault has a low response success rate."
     "expr": |
       (
-        sum(
-          rate(
-            vault_core_response_status_code{
-              job=~".*vault.*",
-              type=~"4xx|5xx"
-            }[5m]
-          )
-        ) by (job, instance)
-        /
-        sum(
-          rate(
-            vault_core_response_status_code{
-              job=~".*vault.*"
-            }[5m]
-          )
-        ) by (job, instance)
+        1 -
+        (
+          sum(
+            rate(
+              vault_core_response_status_code{
+                job=~".*vault.*",
+                type="5xx"
+              }[5m]
+            )
+          ) by (job, instance)
+          /
+          sum(
+            rate(
+              vault_core_response_status_code{
+                job=~".*vault.*"
+              }[5m]
+            )
+          ) by (job, instance)
+        )
+      )
         * 100
-      ) > 5
+      < 95
       and
       sum(
         rate(
           vault_core_response_status_code{
             job=~".*vault.*",
-            type=~"4xx|5xx"
+            type="5xx"
           }[5m]
         )
       ) by (job, instance)

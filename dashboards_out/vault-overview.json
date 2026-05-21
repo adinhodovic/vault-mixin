@@ -465,11 +465,11 @@
                   "uid": "$datasource"
                },
                "exemplar": false,
-               "expr": "sum(\n  rate(\n    vault_core_response_status_code{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n,\n      type=~\"4xx|5xx\"\n    }[$__rate_interval]\n  )\n)\n/\nsum(\n  rate(\n    vault_core_response_status_code{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n\n    }[$__rate_interval]\n  )\n)\n* 100\n",
-               "legendFormat": "Error Rate"
+               "expr": "(\n  1 -\n  (\n    sum(\n      rate(\n        vault_core_response_status_code{\n          job=~\"$job\",\ninstance=~\"$instance\"\n\n,\n          type=\"5xx\"\n        }[$__rate_interval]\n      )\n    )\n    /\n    sum(\n      rate(\n        vault_core_response_status_code{\n          job=~\"$job\",\ninstance=~\"$instance\"\n\n\n        }[$__rate_interval]\n      )\n    )\n  )\n)\n* 100\n",
+               "legendFormat": "Success Rate"
             }
          ],
-         "title": "Response Error Rate",
+         "title": "Response Success Rate",
          "type": "timeseries"
       },
       {
