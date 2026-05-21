@@ -60,16 +60,6 @@ local grid = g.util.grid;
           )
         ||| % defaultFilters,
 
-        responseRateByCode: |||
-          sum by (type) (
-            rate(
-              vault_core_response_status_code{
-                %(default)s
-              }[$__rate_interval]
-            )
-          )
-        ||| % defaultFilters,
-
         responseSuccessRate: |||
           (
             1 -
@@ -224,22 +214,6 @@ local grid = g.util.grid;
           )
         ||| % defaultFilters,
 
-        raftTerm: |||
-          max by (peer_id) (
-            vault_raft_storage_stats_term{
-              %(clustered)s
-            }
-          )
-        ||| % defaultFilters,
-
-        raftLeaderOldestLogAge: |||
-          max(
-            vault_raft_leader_oldestLogAge{
-              %(default)s
-            }
-          )
-        ||| % defaultFilters,
-
         raftBoltPageBytesByDatabase: |||
           sum by (database) (
             vault_raft_storage_bolt_page_bytes_allocated{
@@ -359,18 +333,6 @@ local grid = g.util.grid;
           )
         ||| % defaultFilters,
 
-        pendingTokens: |||
-          sum(
-            vault_token_create_count{
-              %(default)s
-            }
-            -
-            vault_token_store_count{
-              %(default)s
-            }
-          )
-        ||| % defaultFilters,
-
         tokensByAuth: |||
           sum by (auth_method) (
             vault_token_count_by_auth{
@@ -382,8 +344,8 @@ local grid = g.util.grid;
         tokenCreateRate: |||
           sum(
             rate(
-              vault_token_create_count{
-                %(default)s
+              vault_token_creation{
+                %(tokenScoped)s
               }[$__rate_interval]
             )
           )
@@ -475,46 +437,6 @@ local grid = g.util.grid;
           )
         ||| % defaultFilters,
 
-        heapObjects: |||
-          avg(
-            vault_runtime_heap_objects{
-              %(default)s
-            }
-          )
-        ||| % defaultFilters,
-
-        gcRuns: |||
-          sum(
-            vault_runtime_total_gc_runs{
-              %(default)s
-            }
-          )
-        ||| % defaultFilters,
-
-        gcPause: |||
-          sum(
-            vault_runtime_total_gc_pause_ns{
-              %(default)s
-            }
-          )
-        ||| % defaultFilters,
-
-        mallocs: |||
-          sum(
-            vault_runtime_malloc_count{
-              %(default)s
-            }
-          )
-        ||| % defaultFilters,
-
-        frees: |||
-          sum(
-            vault_runtime_free_count{
-              %(default)s
-            }
-          )
-        ||| % defaultFilters,
-
         processCpuRate: |||
           sum(
             rate(
@@ -543,24 +465,6 @@ local grid = g.util.grid;
               %(default)s
             }
             * 100
-          )
-        ||| % defaultFilters,
-
-        processNetworkRate: |||
-          sum(
-            rate(
-              process_network_receive_bytes_total{
-                %(default)s
-              }[$__rate_interval]
-            )
-          )
-          +
-          sum(
-            rate(
-              process_network_transmit_bytes_total{
-                %(default)s
-              }[$__rate_interval]
-            )
           )
         ||| % defaultFilters,
 
@@ -614,11 +518,11 @@ local grid = g.util.grid;
             '{{ type }}',
           ),
 
-        responseRateByCodeTimeSeries:
+        responseRateByTypeTimeSeries:
           mixinUtils.dashboards.timeSeriesPanel(
-            'Response Rate by Code',
+            'Response Rate by Type',
             'reqps',
-            queries.responseRateByCode,
+            queries.responseRateByType,
             '{{ type }}',
             stack='normal',
           ),
@@ -757,22 +661,6 @@ local grid = g.util.grid;
             '{{ peer_id }}',
           ),
 
-        raftTermTimeSeries:
-          mixinUtils.dashboards.timeSeriesPanel(
-            'Raft Term',
-            'short',
-            queries.raftTerm,
-            '{{ peer_id }}',
-          ),
-
-        raftLeaderOldestLogAgeTimeSeries:
-          mixinUtils.dashboards.timeSeriesPanel(
-            'Raft Leader Oldest Log Age',
-            's',
-            queries.raftLeaderOldestLogAge,
-            'Oldest Log Age',
-          ),
-
         raftBoltPageBytesByDatabasePieChart:
           mixinUtils.dashboards.pieChartPanel(
             'Raft Bolt Page Bytes by Database',
@@ -800,7 +688,7 @@ local grid = g.util.grid;
         raftBoltWriteTimeRateByDatabaseTimeSeries:
           mixinUtils.dashboards.timeSeriesPanel(
             'Raft Bolt Write Time Rate',
-            'ns',
+            'ms',
             queries.raftBoltWriteTimeRateByDatabase,
             '{{ database }}',
           ),
@@ -840,15 +728,6 @@ local grid = g.util.grid;
             'short',
             queries.availableTokens,
             'Tokens',
-            stack='normal',
-          ),
-
-        pendingTokensTimeSeries:
-          mixinUtils.dashboards.timeSeriesPanel(
-            'Pending Tokens',
-            'short',
-            queries.pendingTokens,
-            'Pending',
             stack='normal',
           ),
 
@@ -913,42 +792,22 @@ local grid = g.util.grid;
             'Goroutines',
           ),
 
-        heapObjectsTimeSeries:
+        processCpuTimeSeries:
           mixinUtils.dashboards.timeSeriesPanel(
-            'Heap Objects',
+            'Process CPU',
             'short',
-            queries.heapObjects,
-            'Objects',
+            queries.processCpuRate,
+            'CPU seconds/s',
           ),
 
-        gcTimeSeries:
+        openFDPercentTimeSeries:
           mixinUtils.dashboards.timeSeriesPanel(
-            'GC Activity',
-            'short',
-            [
-              { expr: queries.gcRuns, legend: 'GC Runs' },
-              { expr: queries.gcPause, legend: 'GC Pause ns' },
-            ],
-          ),
-
-        allocationsTimeSeries:
-          mixinUtils.dashboards.timeSeriesPanel(
-            'Runtime Allocations',
-            'short',
-            [
-              { expr: queries.mallocs, legend: 'Mallocs' },
-              { expr: queries.frees, legend: 'Frees' },
-            ],
-          ),
-
-        processResourcesTimeSeries:
-          mixinUtils.dashboards.timeSeriesPanel(
-            'Process Resources',
-            'short',
-            [
-              { expr: queries.processCpuRate, legend: 'CPU seconds/s' },
-              { expr: queries.openFDPercent, legend: 'Open FDs %' },
-            ],
+            'Open FD Usage',
+            'percent',
+            queries.openFDPercent,
+            'Open FDs',
+            min=0,
+            max=100,
           ),
 
         processMemoryTimeSeries:
@@ -957,14 +816,6 @@ local grid = g.util.grid;
             'decbytes',
             queries.processResidentMemory,
             'RSS',
-          ),
-
-        processNetworkTimeSeries:
-          mixinUtils.dashboards.timeSeriesPanel(
-            'Process Network Rate',
-            'Bps',
-            queries.processNetworkRate,
-            'Network I/O',
           ),
 
         cacheHitRateTimeSeries:
@@ -1007,7 +858,7 @@ local grid = g.util.grid;
         grid.wrapPanels(
           [
             panels.responseRateByTypePieChart,
-            panels.responseRateByCodeTimeSeries,
+            panels.responseRateByTypeTimeSeries,
             panels.responseSuccessRateTimeSeries,
           ],
           panelWidth=8,
@@ -1049,8 +900,6 @@ local grid = g.util.grid;
             panels.raftApplyRateTimeSeries,
             panels.raftPeerIndexesTimeSeries,
             panels.raftFSMPendingTimeSeries,
-            panels.raftTermTimeSeries,
-            panels.raftLeaderOldestLogAgeTimeSeries,
           ],
           panelWidth=12,
           panelHeight=8,
@@ -1100,7 +949,6 @@ local grid = g.util.grid;
         grid.wrapPanels(
           [
             panels.availableTokensTimeSeries,
-            panels.pendingTokensTimeSeries,
             panels.tokensByAuthTimeSeries,
             panels.tokenOperationsTimeSeries,
           ],
@@ -1135,12 +983,9 @@ local grid = g.util.grid;
           [
             panels.memoryTimeSeries,
             panels.goroutinesTimeSeries,
-            panels.heapObjectsTimeSeries,
-            panels.gcTimeSeries,
-            panels.allocationsTimeSeries,
-            panels.processResourcesTimeSeries,
+            panels.processCpuTimeSeries,
+            panels.openFDPercentTimeSeries,
             panels.processMemoryTimeSeries,
-            panels.processNetworkTimeSeries,
             panels.cacheHitRateTimeSeries,
           ],
           panelWidth=8,

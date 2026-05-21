@@ -415,7 +415,7 @@
                "legendFormat": "{{ type }}"
             }
          ],
-         "title": "Response Rate by Code",
+         "title": "Response Rate by Type",
          "type": "timeseries"
       },
       {
@@ -1162,110 +1162,6 @@
          "type": "timeseries"
       },
       {
-         "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-         },
-         "fieldConfig": {
-            "defaults": {
-               "custom": {
-                  "fillOpacity": 10
-               },
-               "unit": "short"
-            }
-         },
-         "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 60
-         },
-         "id": 26,
-         "options": {
-            "legend": {
-               "calcs": [
-                  "mean",
-                  "max"
-               ],
-               "displayMode": "table",
-               "placement": "right",
-               "showLegend": true,
-               "sortBy": "mean",
-               "sortDesc": true
-            },
-            "tooltip": {
-               "mode": "multi",
-               "sort": "desc"
-            }
-         },
-         "pluginVersion": "v11.4.0",
-         "targets": [
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "max by (peer_id) (\n  vault_raft_storage_stats_term{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n,\ncluster=~\"$exported_cluster\"\n\n  }\n)\n",
-               "legendFormat": "{{ peer_id }}"
-            }
-         ],
-         "title": "Raft Term",
-         "type": "timeseries"
-      },
-      {
-         "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-         },
-         "fieldConfig": {
-            "defaults": {
-               "custom": {
-                  "fillOpacity": 10
-               },
-               "unit": "s"
-            }
-         },
-         "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 60
-         },
-         "id": 27,
-         "options": {
-            "legend": {
-               "calcs": [
-                  "mean",
-                  "max"
-               ],
-               "displayMode": "table",
-               "placement": "right",
-               "showLegend": true,
-               "sortBy": "mean",
-               "sortDesc": true
-            },
-            "tooltip": {
-               "mode": "multi",
-               "sort": "desc"
-            }
-         },
-         "pluginVersion": "v11.4.0",
-         "targets": [
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "max(\n  vault_raft_leader_oldestLogAge{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n)\n",
-               "legendFormat": "Oldest Log Age"
-            }
-         ],
-         "title": "Raft Leader Oldest Log Age",
-         "type": "timeseries"
-      },
-      {
          "collapsed": false,
          "gridPos": {
             "h": 1,
@@ -1273,7 +1169,7 @@
             "x": 0,
             "y": 68
          },
-         "id": 28,
+         "id": 26,
          "title": "Raft Storage",
          "type": "row"
       },
@@ -1294,7 +1190,7 @@
             "x": 0,
             "y": 69
          },
-         "id": 29,
+         "id": 27,
          "options": {
             "displayLabels": [
                "percent"
@@ -1346,7 +1242,7 @@
             "x": 12,
             "y": 69
          },
-         "id": 30,
+         "id": 28,
          "options": {
             "legend": {
                "calcs": [
@@ -1398,7 +1294,7 @@
             "x": 0,
             "y": 77
          },
-         "id": 31,
+         "id": 29,
          "options": {
             "legend": {
                "calcs": [
@@ -1441,7 +1337,7 @@
                "custom": {
                   "fillOpacity": 10
                },
-               "unit": "ns"
+               "unit": "ms"
             }
          },
          "gridPos": {
@@ -1450,7 +1346,7 @@
             "x": 12,
             "y": 77
          },
-         "id": 32,
+         "id": 30,
          "options": {
             "legend": {
                "calcs": [
@@ -1491,7 +1387,7 @@
             "x": 0,
             "y": 85
          },
-         "id": 33,
+         "id": 31,
          "title": "Requests",
          "type": "row"
       },
@@ -1514,7 +1410,7 @@
             "x": 0,
             "y": 86
          },
-         "id": 34,
+         "id": 32,
          "options": {
             "legend": {
                "calcs": [
@@ -1575,7 +1471,7 @@
             "x": 12,
             "y": 86
          },
-         "id": 35,
+         "id": 33,
          "options": {
             "legend": {
                "calcs": [
@@ -1625,7 +1521,7 @@
             "x": 0,
             "y": 94
          },
-         "id": 36,
+         "id": 34,
          "title": "Tokens",
          "type": "row"
       },
@@ -1653,7 +1549,7 @@
             "x": 0,
             "y": 95
          },
-         "id": 37,
+         "id": 35,
          "options": {
             "legend": {
                "calcs": [
@@ -1710,64 +1606,7 @@
             "x": 12,
             "y": 95
          },
-         "id": 38,
-         "options": {
-            "legend": {
-               "calcs": [
-                  "mean",
-                  "max"
-               ],
-               "displayMode": "table",
-               "placement": "right",
-               "showLegend": true,
-               "sortBy": "mean",
-               "sortDesc": true
-            },
-            "tooltip": {
-               "mode": "multi",
-               "sort": "desc"
-            }
-         },
-         "pluginVersion": "v11.4.0",
-         "targets": [
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "sum(\n  vault_token_create_count{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n  -\n  vault_token_store_count{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n)\n",
-               "legendFormat": "Pending"
-            }
-         ],
-         "title": "Pending Tokens",
-         "type": "timeseries"
-      },
-      {
-         "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-         },
-         "fieldConfig": {
-            "defaults": {
-               "custom": {
-                  "axisSoftMin": 0,
-                  "fillOpacity": 100,
-                  "lineWidth": 1,
-                  "stacking": {
-                     "mode": "normal"
-                  }
-               },
-               "unit": "short"
-            }
-         },
-         "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 103
-         },
-         "id": 39,
+         "id": 36,
          "options": {
             "legend": {
                "calcs": [
@@ -1821,10 +1660,10 @@
          "gridPos": {
             "h": 8,
             "w": 12,
-            "x": 12,
+            "x": 0,
             "y": 103
          },
-         "id": 40,
+         "id": 37,
          "options": {
             "legend": {
                "calcs": [
@@ -1850,7 +1689,7 @@
                   "uid": "$datasource"
                },
                "exemplar": false,
-               "expr": "sum(\n  rate(\n    vault_token_create_count{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n\n    }[$__rate_interval]\n  )\n)\n",
+               "expr": "sum(\n  rate(\n    vault_token_creation{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n,\ncluster=~\"$exported_cluster\"\n,\nnamespace=~\"$exported_namespace\"\n\n    }[$__rate_interval]\n  )\n)\n",
                "legendFormat": "Create"
             },
             {
@@ -1883,7 +1722,7 @@
             "x": 0,
             "y": 111
          },
-         "id": 41,
+         "id": 38,
          "title": "Audit",
          "type": "row"
       },
@@ -1906,7 +1745,7 @@
             "x": 0,
             "y": 112
          },
-         "id": 42,
+         "id": 39,
          "options": {
             "legend": {
                "calcs": [
@@ -1967,7 +1806,7 @@
             "x": 12,
             "y": 112
          },
-         "id": 43,
+         "id": 40,
          "options": {
             "legend": {
                "calcs": [
@@ -2017,7 +1856,7 @@
             "x": 0,
             "y": 120
          },
-         "id": 44,
+         "id": 41,
          "title": "Runtime",
          "type": "row"
       },
@@ -2040,7 +1879,7 @@
             "x": 0,
             "y": 121
          },
-         "id": 45,
+         "id": 42,
          "options": {
             "legend": {
                "calcs": [
@@ -2101,7 +1940,7 @@
             "x": 8,
             "y": 121
          },
-         "id": 46,
+         "id": 43,
          "options": {
             "legend": {
                "calcs": [
@@ -2153,181 +1992,7 @@
             "x": 16,
             "y": 121
          },
-         "id": 47,
-         "options": {
-            "legend": {
-               "calcs": [
-                  "mean",
-                  "max"
-               ],
-               "displayMode": "table",
-               "placement": "right",
-               "showLegend": true,
-               "sortBy": "mean",
-               "sortDesc": true
-            },
-            "tooltip": {
-               "mode": "multi",
-               "sort": "desc"
-            }
-         },
-         "pluginVersion": "v11.4.0",
-         "targets": [
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "avg(\n  vault_runtime_heap_objects{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n)\n",
-               "legendFormat": "Objects"
-            }
-         ],
-         "title": "Heap Objects",
-         "type": "timeseries"
-      },
-      {
-         "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-         },
-         "fieldConfig": {
-            "defaults": {
-               "custom": {
-                  "fillOpacity": 10
-               },
-               "unit": "short"
-            }
-         },
-         "gridPos": {
-            "h": 6,
-            "w": 8,
-            "x": 0,
-            "y": 127
-         },
-         "id": 48,
-         "options": {
-            "legend": {
-               "calcs": [
-                  "mean",
-                  "max"
-               ],
-               "displayMode": "table",
-               "placement": "right",
-               "showLegend": true,
-               "sortBy": "mean",
-               "sortDesc": true
-            },
-            "tooltip": {
-               "mode": "multi",
-               "sort": "desc"
-            }
-         },
-         "pluginVersion": "v11.4.0",
-         "targets": [
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "sum(\n  vault_runtime_total_gc_runs{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n)\n",
-               "legendFormat": "GC Runs"
-            },
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "sum(\n  vault_runtime_total_gc_pause_ns{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n)\n",
-               "legendFormat": "GC Pause ns"
-            }
-         ],
-         "title": "GC Activity",
-         "type": "timeseries"
-      },
-      {
-         "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-         },
-         "fieldConfig": {
-            "defaults": {
-               "custom": {
-                  "fillOpacity": 10
-               },
-               "unit": "short"
-            }
-         },
-         "gridPos": {
-            "h": 6,
-            "w": 8,
-            "x": 8,
-            "y": 127
-         },
-         "id": 49,
-         "options": {
-            "legend": {
-               "calcs": [
-                  "mean",
-                  "max"
-               ],
-               "displayMode": "table",
-               "placement": "right",
-               "showLegend": true,
-               "sortBy": "mean",
-               "sortDesc": true
-            },
-            "tooltip": {
-               "mode": "multi",
-               "sort": "desc"
-            }
-         },
-         "pluginVersion": "v11.4.0",
-         "targets": [
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "sum(\n  vault_runtime_malloc_count{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n)\n",
-               "legendFormat": "Mallocs"
-            },
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "sum(\n  vault_runtime_free_count{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n)\n",
-               "legendFormat": "Frees"
-            }
-         ],
-         "title": "Runtime Allocations",
-         "type": "timeseries"
-      },
-      {
-         "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-         },
-         "fieldConfig": {
-            "defaults": {
-               "custom": {
-                  "fillOpacity": 10
-               },
-               "unit": "short"
-            }
-         },
-         "gridPos": {
-            "h": 6,
-            "w": 8,
-            "x": 16,
-            "y": 127
-         },
-         "id": 50,
+         "id": 44,
          "options": {
             "legend": {
                "calcs": [
@@ -2355,7 +2020,52 @@
                "exemplar": false,
                "expr": "sum(\n  rate(\n    process_cpu_seconds_total{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n\n    }[$__rate_interval]\n  )\n)\n",
                "legendFormat": "CPU seconds/s"
+            }
+         ],
+         "title": "Process CPU",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "axisSoftMax": 100,
+                  "axisSoftMin": 0,
+                  "fillOpacity": 10
+               },
+               "unit": "percent"
+            }
+         },
+         "gridPos": {
+            "h": 6,
+            "w": 8,
+            "x": 0,
+            "y": 127
+         },
+         "id": 45,
+         "options": {
+            "legend": {
+               "calcs": [
+                  "mean",
+                  "max"
+               ],
+               "displayMode": "table",
+               "placement": "right",
+               "showLegend": true,
+               "sortBy": "mean",
+               "sortDesc": true
             },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
             {
                "datasource": {
                   "type": "prometheus",
@@ -2363,10 +2073,10 @@
                },
                "exemplar": false,
                "expr": "max(\n  process_open_fds{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n  /\n  process_max_fds{\n    job=~\"$job\",\ninstance=~\"$instance\"\n\n\n  }\n  * 100\n)\n",
-               "legendFormat": "Open FDs %"
+               "legendFormat": "Open FDs"
             }
          ],
-         "title": "Process Resources",
+         "title": "Open FD Usage",
          "type": "timeseries"
       },
       {
@@ -2385,10 +2095,10 @@
          "gridPos": {
             "h": 6,
             "w": 8,
-            "x": 0,
-            "y": 133
+            "x": 8,
+            "y": 127
          },
-         "id": 51,
+         "id": 46,
          "options": {
             "legend": {
                "calcs": [
@@ -2431,58 +2141,6 @@
                "custom": {
                   "fillOpacity": 10
                },
-               "unit": "Bps"
-            }
-         },
-         "gridPos": {
-            "h": 6,
-            "w": 8,
-            "x": 8,
-            "y": 133
-         },
-         "id": 52,
-         "options": {
-            "legend": {
-               "calcs": [
-                  "mean",
-                  "max"
-               ],
-               "displayMode": "table",
-               "placement": "right",
-               "showLegend": true,
-               "sortBy": "mean",
-               "sortDesc": true
-            },
-            "tooltip": {
-               "mode": "multi",
-               "sort": "desc"
-            }
-         },
-         "pluginVersion": "v11.4.0",
-         "targets": [
-            {
-               "datasource": {
-                  "type": "prometheus",
-                  "uid": "$datasource"
-               },
-               "exemplar": false,
-               "expr": "sum(\n  rate(\n    process_network_receive_bytes_total{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n\n    }[$__rate_interval]\n  )\n)\n+\nsum(\n  rate(\n    process_network_transmit_bytes_total{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n\n    }[$__rate_interval]\n  )\n)\n",
-               "legendFormat": "Network I/O"
-            }
-         ],
-         "title": "Process Network Rate",
-         "type": "timeseries"
-      },
-      {
-         "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-         },
-         "fieldConfig": {
-            "defaults": {
-               "custom": {
-                  "fillOpacity": 10
-               },
                "unit": "ops"
             }
          },
@@ -2490,9 +2148,9 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 133
+            "y": 127
          },
-         "id": 53,
+         "id": 47,
          "options": {
             "legend": {
                "calcs": [
