@@ -1514,14 +1514,118 @@
          "type": "timeseries"
       },
       {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10
+               },
+               "unit": "ops"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 94
+         },
+         "id": 34,
+         "options": {
+            "legend": {
+               "calcs": [
+                  "mean",
+                  "max"
+               ],
+               "displayMode": "table",
+               "placement": "right",
+               "showLegend": true,
+               "sortBy": "mean",
+               "sortDesc": true
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+               },
+               "exemplar": false,
+               "expr": "sum by (route) (\n  rate(\n    label_replace(\n      {\n        __name__=~\"vault_route_read_.+__count\",\n        job=~\"$job\",\ninstance=~\"$instance\"\n\n\n      },\n      \"route\", \"$1\", \"__name__\", \"vault_route_read_(.+)__count\"\n    )[$__rate_interval:]\n  )\n)\n",
+               "legendFormat": "{{ route }}"
+            }
+         ],
+         "title": "Route Read Rate",
+         "type": "timeseries"
+      },
+      {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10
+               },
+               "unit": "ms"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 94
+         },
+         "id": 35,
+         "options": {
+            "legend": {
+               "calcs": [
+                  "mean",
+                  "max"
+               ],
+               "displayMode": "table",
+               "placement": "right",
+               "showLegend": true,
+               "sortBy": "mean",
+               "sortDesc": true
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+               },
+               "exemplar": false,
+               "expr": "(\n  sum by (route) (\n    rate(\n      label_replace(\n        {\n          __name__=~\"vault_route_read_.+__sum\",\n          job=~\"$job\",\ninstance=~\"$instance\"\n\n\n        },\n        \"route\", \"$1\", \"__name__\", \"vault_route_read_(.+)__sum\"\n      )[$__rate_interval:]\n    )\n  )\n  /\n  sum by (route) (\n    rate(\n      label_replace(\n        {\n          __name__=~\"vault_route_read_.+__count\",\n          job=~\"$job\",\ninstance=~\"$instance\"\n\n\n        },\n        \"route\", \"$1\", \"__name__\", \"vault_route_read_(.+)__count\"\n      )[$__rate_interval:]\n    )\n  )\n)\n* 1000\n",
+               "legendFormat": "{{ route }}"
+            }
+         ],
+         "title": "Route Read Latency",
+         "type": "timeseries"
+      },
+      {
          "collapsed": false,
          "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 94
+            "y": 102
          },
-         "id": 34,
+         "id": 36,
          "title": "Tokens",
          "type": "row"
       },
@@ -1547,9 +1651,9 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 95
+            "y": 103
          },
-         "id": 35,
+         "id": 37,
          "options": {
             "legend": {
                "calcs": [
@@ -1604,9 +1708,9 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 95
+            "y": 103
          },
-         "id": 36,
+         "id": 38,
          "options": {
             "legend": {
                "calcs": [
@@ -1661,9 +1765,9 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 103
+            "y": 111
          },
-         "id": 37,
+         "id": 39,
          "options": {
             "legend": {
                "calcs": [
@@ -1698,6 +1802,15 @@
                   "uid": "$datasource"
                },
                "exemplar": false,
+               "expr": "sum(\n  rate(\n    vault_token_create_count{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n\n    }[$__rate_interval]\n  )\n)\n",
+               "legendFormat": "Create count"
+            },
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+               },
+               "exemplar": false,
                "expr": "sum(\n  rate(\n    vault_token_store_count{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n\n    }[$__rate_interval]\n  )\n)\n",
                "legendFormat": "Store"
             },
@@ -1720,9 +1833,9 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 111
+            "y": 119
          },
-         "id": 38,
+         "id": 40,
          "title": "Audit",
          "type": "row"
       },
@@ -1743,9 +1856,9 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 112
+            "y": 120
          },
-         "id": 39,
+         "id": 41,
          "options": {
             "legend": {
                "calcs": [
@@ -1804,9 +1917,9 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 112
+            "y": 120
          },
-         "id": 40,
+         "id": 42,
          "options": {
             "legend": {
                "calcs": [
@@ -1854,9 +1967,73 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 120
+            "y": 129
          },
-         "id": 41,
+         "id": 43,
+         "title": "Policy",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "fieldConfig": {
+            "defaults": {
+               "custom": {
+                  "fillOpacity": 10
+               },
+               "unit": "ops"
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 130
+         },
+         "id": 44,
+         "options": {
+            "legend": {
+               "calcs": [
+                  "mean",
+                  "max"
+               ],
+               "displayMode": "table",
+               "placement": "right",
+               "showLegend": true,
+               "sortBy": "mean",
+               "sortDesc": true
+            },
+            "tooltip": {
+               "mode": "multi",
+               "sort": "desc"
+            }
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+               },
+               "exemplar": false,
+               "expr": "sum(\n  rate(\n    vault_policy_get_policy_count{\n      job=~\"$job\",\ninstance=~\"$instance\"\n\n\n    }[$__rate_interval]\n  )\n)\n",
+               "legendFormat": "Get"
+            }
+         ],
+         "title": "Policy Get Rate",
+         "type": "timeseries"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 138
+         },
+         "id": 45,
          "title": "Runtime",
          "type": "row"
       },
@@ -1877,9 +2054,9 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 121
+            "y": 139
          },
-         "id": 42,
+         "id": 46,
          "options": {
             "legend": {
                "calcs": [
@@ -1938,9 +2115,9 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 121
+            "y": 139
          },
-         "id": 43,
+         "id": 47,
          "options": {
             "legend": {
                "calcs": [
@@ -1990,9 +2167,9 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 121
+            "y": 139
          },
-         "id": 44,
+         "id": 48,
          "options": {
             "legend": {
                "calcs": [
@@ -2044,9 +2221,9 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 127
+            "y": 145
          },
-         "id": 45,
+         "id": 49,
          "options": {
             "legend": {
                "calcs": [
@@ -2096,9 +2273,9 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 127
+            "y": 145
          },
-         "id": 46,
+         "id": 50,
          "options": {
             "legend": {
                "calcs": [
@@ -2148,9 +2325,9 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 127
+            "y": 145
          },
-         "id": 47,
+         "id": 51,
          "options": {
             "legend": {
                "calcs": [
