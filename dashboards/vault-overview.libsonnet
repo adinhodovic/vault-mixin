@@ -324,6 +324,49 @@ local grid = g.util.grid;
           )
         ||| % defaultFilters,
 
+        routeReadRateByRoute: |||
+          sum by (route) (
+            rate(
+              label_replace(
+                {
+                  __name__=~"vault_route_read_.+__count",
+                  %(default)s
+                },
+                "route", "$1", "__name__", "vault_route_read_(.+)__count"
+              )[$__rate_interval:]
+            )
+          )
+        ||| % defaultFilters,
+
+        routeReadLatencyByRoute: |||
+          (
+            sum by (route) (
+              rate(
+                label_replace(
+                  {
+                    __name__=~"vault_route_read_.+__sum",
+                    %(default)s
+                  },
+                  "route", "$1", "__name__", "vault_route_read_(.+)__sum"
+                )[$__rate_interval:]
+              )
+            )
+            /
+            sum by (route) (
+              rate(
+                label_replace(
+                  {
+                    __name__=~"vault_route_read_.+__count",
+                    %(default)s
+                  },
+                  "route", "$1", "__name__", "vault_route_read_(.+)__count"
+                )[$__rate_interval:]
+              )
+            )
+          )
+          * 1000
+        ||| % defaultFilters,
+
         // Tokens
         availableTokens: |||
           sum(
@@ -346,6 +389,16 @@ local grid = g.util.grid;
             rate(
               vault_token_creation{
                 %(tokenScoped)s
+              }[$__rate_interval]
+            )
+          )
+        ||| % defaultFilters,
+
+        tokenCreateCountRate: |||
+          sum(
+            rate(
+              vault_token_create_count{
+                %(default)s
               }[$__rate_interval]
             )
           )
@@ -406,6 +459,16 @@ local grid = g.util.grid;
           sum(
             rate(
               vault_audit_log_response_failure{
+                %(default)s
+              }[$__rate_interval]
+            )
+          )
+        ||| % defaultFilters,
+
+        policyGetRate: |||
+          sum(
+            rate(
+              vault_policy_get_policy_count{
                 %(default)s
               }[$__rate_interval]
             )
@@ -721,6 +784,22 @@ local grid = g.util.grid;
             ],
           ),
 
+        routeReadRateTimeSeries:
+          mixinUtils.dashboards.timeSeriesPanel(
+            'Route Read Rate',
+            'ops',
+            queries.routeReadRateByRoute,
+            '{{ route }}',
+          ),
+
+        routeReadLatencyTimeSeries:
+          mixinUtils.dashboards.timeSeriesPanel(
+            'Route Read Latency',
+            'ms',
+            queries.routeReadLatencyByRoute,
+            '{{ route }}',
+          ),
+
         // Tokens
         availableTokensTimeSeries:
           mixinUtils.dashboards.timeSeriesPanel(
@@ -746,6 +825,7 @@ local grid = g.util.grid;
             'ops',
             [
               { expr: queries.tokenCreateRate, legend: 'Create' },
+              { expr: queries.tokenCreateCountRate, legend: 'Create count' },
               { expr: queries.tokenStoreRate, legend: 'Store' },
               { expr: queries.tokenLookupRate, legend: 'Lookup' },
             ],
@@ -771,6 +851,14 @@ local grid = g.util.grid;
               { expr: queries.auditRequestFailureRate, legend: 'Request failure' },
               { expr: queries.auditResponseFailureRate, legend: 'Response failure' },
             ],
+          ),
+
+        policyGetRateTimeSeries:
+          mixinUtils.dashboards.timeSeriesPanel(
+            'Policy Get Rate',
+            'ops',
+            queries.policyGetRate,
+            'Get',
           ),
 
         // Runtime
@@ -934,6 +1022,8 @@ local grid = g.util.grid;
           [
             panels.requestRateTimeSeries,
             panels.requestLatencyTimeSeries,
+            panels.routeReadRateTimeSeries,
+            panels.routeReadLatencyTimeSeries,
           ],
           panelWidth=12,
           panelHeight=8,
@@ -942,7 +1032,7 @@ local grid = g.util.grid;
         [
           row.new('Tokens') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(94) +
+          row.gridPos.withY(102) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -954,12 +1044,12 @@ local grid = g.util.grid;
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=95
+          startY=103
         ) +
         [
           row.new('Audit') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(111) +
+          row.gridPos.withY(119) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -970,12 +1060,27 @@ local grid = g.util.grid;
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=112
+          startY=120
+        ) +
+        [
+          row.new('Policy') +
+          row.gridPos.withX(0) +
+          row.gridPos.withY(129) +
+          row.gridPos.withW(24) +
+          row.gridPos.withH(1),
+        ] +
+        grid.wrapPanels(
+          [
+            panels.policyGetRateTimeSeries,
+          ],
+          panelWidth=12,
+          panelHeight=8,
+          startY=130
         ) +
         [
           row.new('Runtime') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(120) +
+          row.gridPos.withY(138) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -990,7 +1095,7 @@ local grid = g.util.grid;
           ],
           panelWidth=8,
           panelHeight=6,
-          startY=121
+          startY=139
         );
 
       mixinUtils.dashboards.bypassDashboardValidation +
