@@ -19,6 +19,24 @@
     vaultClusterLabel: if this.showMultiCluster then 'exported_cluster' else 'cluster',
     vaultNamespaceLabel: if this.showMultiCluster then 'exported_namespace' else 'namespace',
 
+    // Synthetic /v1/sys/health probing. Vault's /v1/sys/metrics endpoint stops
+    // responding on sealed or uninitialized nodes, so `up == 0` cannot tell a
+    // dead node from a sealed one. A probe (blackbox_exporter, OpenTelemetry
+    // httpcheck, Grafana Alloy) against /v1/sys/health reports the node state
+    // as an HTTP status code: 200 active, 429 standby, 472 DR secondary,
+    // 473 performance standby, 501 uninitialized, 503 sealed.
+    // The health alerts are always generated and stay silent without probe
+    // series; set dashboardEnabled to add a Health Probe row to the dashboard.
+    healthProbe: {
+      dashboardEnabled: false,
+      // Probe series usually come from a different job than the metrics scrape.
+      selector: this.vaultSelector,
+      // Gauge holding the HTTP status code returned by /v1/sys/health.
+      statusCodeMetric: 'vault_health_status_code',
+      // 1 when the probe got an HTTP response, whatever the status code.
+      upMetric: 'vault_health_up',
+    },
+
     grafanaUrl: 'https://grafana.com',
 
     dashboardIds: {
@@ -79,6 +97,25 @@
         severity: 'warning',
         interval: '5m',
         threshold: '0',
+      },
+
+      // The alerts below use the healthProbe metrics.
+      nodeSealed: {
+        enabled: true,
+        severity: 'critical',
+        interval: '1m',
+      },
+
+      nodeUninitialized: {
+        enabled: true,
+        severity: 'warning',
+        interval: '5m',
+      },
+
+      instanceUnreachable: {
+        enabled: true,
+        severity: 'critical',
+        interval: '2m',
       },
     },
 

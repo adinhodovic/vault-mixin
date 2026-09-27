@@ -120,3 +120,58 @@ tests:
               summary: "Vault audit log failures detected."
               description: "Vault audit log failures are occurring on instance vault-0:8200 for the past 5m."
               dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview?var-instance=vault-0:8200"
+  - interval: 1m
+    input_series:
+      - series: 'vault_health_status_code{job="vault", instance="vault-0:8200"}'
+        values: "503+0x10"
+      - series: 'vault_health_status_code{job="vault", instance="vault-1:8200"}'
+        values: "429+0x10"
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: VaultNodeSealed
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: critical
+            exp_annotations:
+              summary: "Vault node is sealed."
+              description: "Vault instance vault-0:8200 is reachable but sealed (/v1/sys/health returned HTTP 503) for the past 1m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview"
+      - eval_time: 10m
+        alertname: VaultNodeUninitialized
+        exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'vault_health_status_code{job="vault", instance="vault-0:8200"}'
+        values: "501+0x10"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: VaultNodeUninitialized
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: warning
+            exp_annotations:
+              summary: "Vault node is uninitialized."
+              description: "Vault instance vault-0:8200 is running but uninitialized (/v1/sys/health returned HTTP 501) for the past 5m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview"
+  - interval: 1m
+    input_series:
+      - series: 'vault_health_up{job="vault", instance="vault-0:8200"}'
+        values: "0+0x10"
+      - series: 'vault_health_up{job="vault", instance="vault-1:8200"}'
+        values: "1+0x10"
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: VaultInstanceUnreachable
+        exp_alerts:
+          - exp_labels:
+              job: vault
+              instance: vault-0:8200
+              severity: critical
+            exp_annotations:
+              summary: "Vault instance is unreachable."
+              description: "Vault instance vault-0:8200 has not answered /v1/sys/health probes for the past 2m."
+              dashboard_url: "https://grafana.com/d/vault-overview-skj2/vault-overview"

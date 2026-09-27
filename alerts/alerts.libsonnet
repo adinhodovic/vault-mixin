@@ -1,6 +1,7 @@
 {
   local clusterVariableQueryString = if $._config.showMultiCluster then '&var-%(clusterLabel)s={{ $labels.%(clusterLabel)s }}' % $._config else '',
   local instanceGroupLabels = if $._config.showMultiCluster then '%(clusterLabel)s, job, instance' % $._config else 'job, instance',
+  local healthDashboardUrl = $._config.dashboardUrls['vault-overview'] + (if $._config.showMultiCluster then '?var-%(clusterLabel)s={{ $labels.%(clusterLabel)s }}' % $._config else ''),
   local vaultClusterGroupLabels = '%(vaultClusterLabel)s' % $._config,
   prometheusAlerts+:: {
     groups+: [
@@ -198,6 +199,67 @@
               summary: 'Vault audit log failures detected.',
               description: 'Vault audit log failures are occurring on instance {{ $labels.instance }} for the past %(interval)s.' % $._config.alerts.auditFailures,
               dashboard_url: $._config.dashboardUrls['vault-overview'] + '?var-instance={{ $labels.instance }}' + clusterVariableQueryString,
+            },
+          },
+        ]),
+      },
+      {
+        local healthConfig = $._config {
+          healthSelector: $._config.healthProbe.selector,
+          statusCodeMetric: $._config.healthProbe.statusCodeMetric,
+          upMetric: $._config.healthProbe.upMetric,
+        },
+        name: 'vault-health',
+        rules: if $._config.alerts.enabled then std.prune([
+          if $._config.alerts.nodeSealed.enabled then {
+            alert: 'VaultNodeSealed',
+            expr: |||
+              %(statusCodeMetric)s{
+                %(healthSelector)s
+              } == 503
+            ||| % healthConfig,
+            'for': $._config.alerts.nodeSealed.interval,
+            labels: {
+              severity: $._config.alerts.nodeSealed.severity,
+            },
+            annotations: {
+              summary: 'Vault node is sealed.',
+              description: 'Vault instance {{ $labels.instance }} is reachable but sealed (/v1/sys/health returned HTTP 503) for the past %(interval)s.' % $._config.alerts.nodeSealed,
+              dashboard_url: healthDashboardUrl,
+            },
+          },
+          if $._config.alerts.nodeUninitialized.enabled then {
+            alert: 'VaultNodeUninitialized',
+            expr: |||
+              %(statusCodeMetric)s{
+                %(healthSelector)s
+              } == 501
+            ||| % healthConfig,
+            'for': $._config.alerts.nodeUninitialized.interval,
+            labels: {
+              severity: $._config.alerts.nodeUninitialized.severity,
+            },
+            annotations: {
+              summary: 'Vault node is uninitialized.',
+              description: 'Vault instance {{ $labels.instance }} is running but uninitialized (/v1/sys/health returned HTTP 501) for the past %(interval)s.' % $._config.alerts.nodeUninitialized,
+              dashboard_url: healthDashboardUrl,
+            },
+          },
+          if $._config.alerts.instanceUnreachable.enabled then {
+            alert: 'VaultInstanceUnreachable',
+            expr: |||
+              %(upMetric)s{
+                %(healthSelector)s
+              } == 0
+            ||| % healthConfig,
+            'for': $._config.alerts.instanceUnreachable.interval,
+            labels: {
+              severity: $._config.alerts.instanceUnreachable.severity,
+            },
+            annotations: {
+              summary: 'Vault instance is unreachable.',
+              description: 'Vault instance {{ $labels.instance }} has not answered /v1/sys/health probes for the past %(interval)s.' % $._config.alerts.instanceUnreachable,
+              dashboard_url: healthDashboardUrl,
             },
           },
         ]),

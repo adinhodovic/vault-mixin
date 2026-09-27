@@ -79,6 +79,41 @@ spec:
           action: labeldrop
 ```
 
+## Health probing
+
+Vault's `/v1/sys/metrics` endpoint stops answering on sealed or uninitialized nodes, and on standby nodes when `unauthenticated_metrics_access` is off. The scrape target then shows `up == 0`, which looks the same as a dead node. Probing `/v1/sys/health` fills the gap: it needs no token and reports the node state as an HTTP status code.
+
+| Status code | Node state          |
+|-------------|---------------------|
+| `200`       | Active              |
+| `429`       | Unsealed standby    |
+| `472`       | DR secondary        |
+| `473`       | Performance standby |
+| `501`       | Uninitialized       |
+| `503`       | Sealed              |
+
+Probe `/v1/sys/health` with blackbox_exporter, the OpenTelemetry Collector `httpcheck` receiver or Grafana Alloy, and expose two series per node:
+
+- `vault_health_status_code`: the HTTP status code returned by the probe.
+- `vault_health_up`: `1` when the probe got an HTTP response, whatever the status code, `0` otherwise.
+
+Either rename your probe metrics to these names, or point the mixin at the names your prober emits. For blackbox_exporter, with `valid_status_codes` covering the codes above so a sealed node still counts as a successful probe:
+
+```jsonnet
+{
+  _config+:: {
+    healthProbe+: {
+      dashboardEnabled: true,
+      selector: 'job="vault-health"',
+      statusCodeMetric: 'probe_http_status_code',
+      upMetric: 'probe_success',
+    },
+  },
+}
+```
+
+The `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts are always generated and stay silent until probe series exist. `dashboardEnabled` adds a Health Probe row to the overview dashboard with per-node state timelines.
+
 ## Runtime metrics
 
 The Runtime row on the overview dashboard surfaces just the high-signal Go runtime metrics (memory, goroutines, GC, allocations, process I/O, cache hit rate). For an in-depth view of Go runtime internals (CPU, memory, GC, scheduling, contention, file descriptor pressure), pair this dashboard with the [Go / Overview dashboard](https://grafana.com/grafana/dashboards/25063-go-overview/) from the [go-mixin](https://github.com/adinhodovic/go-mixin) project.
@@ -102,3 +137,6 @@ The following alerts are included:
 - `VaultLowResponseSuccessRate` — fires when Vault returns too many 5xx responses.
 - `VaultRaftFSMPendingHigh` — fires when Raft FSM pending operations are high.
 - `VaultAuditFailures` — fires when audit request or response logging failures occur.
+- `VaultNodeSealed` — fires when a `/v1/sys/health` probe reports a node as sealed (HTTP 503).
+- `VaultNodeUninitialized` — fires when a `/v1/sys/health` probe reports a node as uninitialized (HTTP 501).
+- `VaultInstanceUnreachable` — fires when a Vault node does not answer `/v1/sys/health` probes.

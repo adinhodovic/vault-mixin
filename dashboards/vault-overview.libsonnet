@@ -6,6 +6,9 @@ local dashboard = g.dashboard;
 local row = g.panel.row;
 local grid = g.util.grid;
 
+local stateTimeline = g.panel.stateTimeline;
+local prometheus = g.query.prometheus;
+
 {
   local dashboardName = 'vault-overview',
   grafanaDashboards+:: {
@@ -24,6 +27,10 @@ local grid = g.util.grid;
       ];
 
       local defaultFilters = util.filters($._config);
+      local healthFilters = defaultFilters {
+        statusCodeMetric: $._config.healthProbe.statusCodeMetric,
+        upMetric: $._config.healthProbe.upMetric,
+      };
       local queries = {
         // Summary
         sealed: |||
@@ -540,6 +547,50 @@ local grid = g.util.grid;
             )
           )
         ||| % defaultFilters,
+
+        // Health probe
+        healthSealedNodes: |||
+          count(
+            %(statusCodeMetric)s{
+              %(health)s
+            } == 503
+          )
+          or vector(0)
+        ||| % healthFilters,
+
+        healthUninitializedNodes: |||
+          count(
+            %(statusCodeMetric)s{
+              %(health)s
+            } == 501
+          )
+          or vector(0)
+        ||| % healthFilters,
+
+        healthUnreachableNodes: |||
+          count(
+            %(upMetric)s{
+              %(health)s
+            } == 0
+          )
+          or vector(0)
+        ||| % healthFilters,
+
+        healthStatusByInstance: |||
+          max by (instance) (
+            %(statusCodeMetric)s{
+              %(health)s
+            }
+          )
+        ||| % healthFilters,
+
+        healthUpByInstance: |||
+          min by (instance) (
+            %(upMetric)s{
+              %(health)s
+            }
+          )
+        ||| % healthFilters,
       };
 
       local panels = {
@@ -913,6 +964,85 @@ local grid = g.util.grid;
             queries.cacheHitRate,
             'Hits',
           ),
+
+        // Health probe
+        healthSealedNodesStat:
+          mixinUtils.dashboards.statPanel(
+            'Sealed Nodes',
+            'short',
+            queries.healthSealedNodes,
+            description='Nodes whose /v1/sys/health probe returns HTTP 503.',
+            steps=[
+              { color: 'green', value: 0 },
+              { color: 'red', value: 1 },
+            ],
+          ),
+
+        healthUninitializedNodesStat:
+          mixinUtils.dashboards.statPanel(
+            'Uninitialized Nodes',
+            'short',
+            queries.healthUninitializedNodes,
+            description='Nodes whose /v1/sys/health probe returns HTTP 501.',
+            steps=[
+              { color: 'green', value: 0 },
+              { color: 'yellow', value: 1 },
+            ],
+          ),
+
+        healthUnreachableNodesStat:
+          mixinUtils.dashboards.statPanel(
+            'Unreachable Nodes',
+            'short',
+            queries.healthUnreachableNodes,
+            description='Nodes that did not answer the /v1/sys/health probe.',
+            steps=[
+              { color: 'green', value: 0 },
+              { color: 'red', value: 1 },
+            ],
+          ),
+
+        healthStatusStateTimeline:
+          stateTimeline.new('Node Health Status') +
+          stateTimeline.panelOptions.withDescription('Node state derived from the HTTP status code returned by /v1/sys/health.') +
+          stateTimeline.queryOptions.withDatasource('prometheus', '$datasource') +
+          stateTimeline.queryOptions.withTargets([
+            prometheus.new('$datasource', queries.healthStatusByInstance) +
+            prometheus.withLegendFormat('{{ instance }}'),
+          ]) +
+          stateTimeline.options.withShowValue('never') +
+          stateTimeline.standardOptions.color.withMode('fixed') +
+          stateTimeline.standardOptions.color.withFixedColor('text') +
+          stateTimeline.standardOptions.withMappings([
+            stateTimeline.standardOptions.mapping.ValueMap.withType() +
+            stateTimeline.standardOptions.mapping.ValueMap.withOptions({
+              '200': { text: 'Active', color: 'green', index: 0 },
+              '429': { text: 'Standby', color: 'blue', index: 1 },
+              '472': { text: 'DR Secondary', color: 'purple', index: 2 },
+              '473': { text: 'Performance Standby', color: 'blue', index: 3 },
+              '501': { text: 'Uninitialized', color: 'yellow', index: 4 },
+              '503': { text: 'Sealed', color: 'red', index: 5 },
+            }),
+          ]),
+
+        healthUpStateTimeline:
+          stateTimeline.new('Health Probe Reachability') +
+          stateTimeline.panelOptions.withDescription('Whether the /v1/sys/health probe got an HTTP response, regardless of status code.') +
+          stateTimeline.queryOptions.withDatasource('prometheus', '$datasource') +
+          stateTimeline.queryOptions.withTargets([
+            prometheus.new('$datasource', queries.healthUpByInstance) +
+            prometheus.withLegendFormat('{{ instance }}'),
+          ]) +
+          stateTimeline.options.withShowValue('never') +
+          stateTimeline.standardOptions.color.withMode('fixed') +
+          stateTimeline.standardOptions.color.withFixedColor('text') +
+          stateTimeline.standardOptions.withMappings([
+            stateTimeline.standardOptions.mapping.ValueMap.withType() +
+            stateTimeline.standardOptions.mapping.ValueMap.withOptions({
+              '0': { text: 'Unreachable', color: 'red', index: 0 },
+              '1': { text: 'Reachable', color: 'green', index: 1 },
+            }),
+          ]),
       };
 
       local rows =
@@ -1096,6 +1226,36 @@ local grid = g.util.grid;
           panelWidth=8,
           panelHeight=6,
           startY=139
+        ) +
+        (
+          if $._config.healthProbe.dashboardEnabled then
+            [
+              row.new('Health Probe') +
+              row.gridPos.withX(0) +
+              row.gridPos.withY(151) +
+              row.gridPos.withW(24) +
+              row.gridPos.withH(1),
+            ] +
+            grid.wrapPanels(
+              [
+                panels.healthSealedNodesStat,
+                panels.healthUninitializedNodesStat,
+                panels.healthUnreachableNodesStat,
+              ],
+              panelWidth=8,
+              panelHeight=4,
+              startY=152
+            ) +
+            grid.wrapPanels(
+              [
+                panels.healthStatusStateTimeline,
+                panels.healthUpStateTimeline,
+              ],
+              panelWidth=12,
+              panelHeight=8,
+              startY=156
+            )
+          else []
         );
 
       mixinUtils.dashboards.bypassDashboardValidation +

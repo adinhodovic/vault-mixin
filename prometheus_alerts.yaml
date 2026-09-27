@@ -139,3 +139,41 @@
     "for": "5m"
     "labels":
       "severity": "warning"
+- "name": "vault-health"
+  "rules":
+  - "alert": "VaultNodeSealed"
+    "annotations":
+      "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview"
+      "description": "Vault instance {{ $labels.instance }} is reachable but sealed (/v1/sys/health returned HTTP 503) for the past 1m."
+      "summary": "Vault node is sealed."
+    "expr": |
+      vault_health_status_code{
+        job=~".*vault.*"
+      } == 503
+    "for": "1m"
+    "labels":
+      "severity": "critical"
+  - "alert": "VaultNodeUninitialized"
+    "annotations":
+      "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview"
+      "description": "Vault instance {{ $labels.instance }} is running but uninitialized (/v1/sys/health returned HTTP 501) for the past 5m."
+      "summary": "Vault node is uninitialized."
+    "expr": |
+      vault_health_status_code{
+        job=~".*vault.*"
+      } == 501
+    "for": "5m"
+    "labels":
+      "severity": "warning"
+  - "alert": "VaultInstanceUnreachable"
+    "annotations":
+      "dashboard_url": "https://grafana.com/d/vault-overview-skj2/vault-overview"
+      "description": "Vault instance {{ $labels.instance }} has not answered /v1/sys/health probes for the past 2m."
+      "summary": "Vault instance is unreachable."
+    "expr": |
+      vault_health_up{
+        job=~".*vault.*"
+      } == 0
+    "for": "2m"
+    "labels":
+      "severity": "critical"
