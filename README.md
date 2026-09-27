@@ -111,7 +111,7 @@ Either rename your probe metrics to these names, or point the mixin at the names
 }
 ```
 
-The `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts and the Health Probe dashboard row stay empty until probe series exist. Set `healthProbe.dashboardEnabled: false` to hide the row.
+The `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts and the Health Probe dashboard row need a prober scraping `/v1/sys/health`; set one up as described above. Set `healthProbe.dashboardEnabled: false` to hide the row.
 
 ## Runtime metrics
 

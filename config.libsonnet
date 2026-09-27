@@ -25,8 +25,8 @@
     // httpcheck, Grafana Alloy) against /v1/sys/health reports the node state
     // as an HTTP status code: 200 active, 429 standby, 472 DR secondary,
     // 473 performance standby, 501 uninitialized, 503 sealed.
-    // The health alerts and dashboard row show nothing until probe series
-    // exist. Set dashboardEnabled to false to hide the row.
+    // The health alerts and dashboard row need a prober scraping
+    // /v1/sys/health. Set dashboardEnabled to false to hide the row.
     healthProbe: {
       dashboardEnabled: true,
       // Probe series usually come from a different job than the metrics scrape.
