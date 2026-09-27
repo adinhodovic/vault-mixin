@@ -2359,6 +2359,295 @@
          ],
          "title": "Cache Hit Rate",
          "type": "timeseries"
+      },
+      {
+         "collapsed": false,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 151
+         },
+         "id": 52,
+         "title": "Health Probe",
+         "type": "row"
+      },
+      {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "description": "Nodes whose /v1/sys/health probe returns HTTP 503.",
+         "fieldConfig": {
+            "defaults": {
+               "mappings": [ ],
+               "thresholds": {
+                  "steps": [
+                     {
+                        "color": "green",
+                        "value": 0
+                     },
+                     {
+                        "color": "red",
+                        "value": 1
+                     }
+                  ]
+               },
+               "unit": "short"
+            }
+         },
+         "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 0,
+            "y": 152
+         },
+         "id": 53,
+         "options": {
+            "graphMode": "area",
+            "percentChangeColorMode": "standard",
+            "showPercentChange": false
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+               },
+               "expr": "count(\n  vault_health_status_code{\n    job=~\".*vault.*\"\n\n  } == 503\n)\n"
+            }
+         ],
+         "title": "Sealed Nodes",
+         "type": "stat"
+      },
+      {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "description": "Nodes whose /v1/sys/health probe returns HTTP 501.",
+         "fieldConfig": {
+            "defaults": {
+               "mappings": [ ],
+               "thresholds": {
+                  "steps": [
+                     {
+                        "color": "green",
+                        "value": 0
+                     },
+                     {
+                        "color": "yellow",
+                        "value": 1
+                     }
+                  ]
+               },
+               "unit": "short"
+            }
+         },
+         "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 8,
+            "y": 152
+         },
+         "id": 54,
+         "options": {
+            "graphMode": "area",
+            "percentChangeColorMode": "standard",
+            "showPercentChange": false
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+               },
+               "expr": "count(\n  vault_health_status_code{\n    job=~\".*vault.*\"\n\n  } == 501\n)\n"
+            }
+         ],
+         "title": "Uninitialized Nodes",
+         "type": "stat"
+      },
+      {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "description": "Nodes that did not answer the /v1/sys/health probe.",
+         "fieldConfig": {
+            "defaults": {
+               "mappings": [ ],
+               "thresholds": {
+                  "steps": [
+                     {
+                        "color": "green",
+                        "value": 0
+                     },
+                     {
+                        "color": "red",
+                        "value": 1
+                     }
+                  ]
+               },
+               "unit": "short"
+            }
+         },
+         "gridPos": {
+            "h": 4,
+            "w": 8,
+            "x": 16,
+            "y": 152
+         },
+         "id": 55,
+         "options": {
+            "graphMode": "area",
+            "percentChangeColorMode": "standard",
+            "showPercentChange": false
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "${datasource}"
+               },
+               "expr": "count(\n  vault_health_up{\n    job=~\".*vault.*\"\n\n  } == 0\n)\n"
+            }
+         ],
+         "title": "Unreachable Nodes",
+         "type": "stat"
+      },
+      {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "description": "Node state derived from the HTTP status code returned by /v1/sys/health.",
+         "fieldConfig": {
+            "defaults": {
+               "color": {
+                  "fixedColor": "text",
+                  "mode": "fixed"
+               },
+               "mappings": [
+                  {
+                     "options": {
+                        "200": {
+                           "color": "green",
+                           "index": 0,
+                           "text": "Active"
+                        },
+                        "429": {
+                           "color": "blue",
+                           "index": 1,
+                           "text": "Standby"
+                        },
+                        "472": {
+                           "color": "purple",
+                           "index": 2,
+                           "text": "DR Secondary"
+                        },
+                        "473": {
+                           "color": "blue",
+                           "index": 3,
+                           "text": "Performance Standby"
+                        },
+                        "501": {
+                           "color": "yellow",
+                           "index": 4,
+                           "text": "Uninitialized"
+                        },
+                        "503": {
+                           "color": "red",
+                           "index": 5,
+                           "text": "Sealed"
+                        }
+                     },
+                     "type": "value"
+                  }
+               ]
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 156
+         },
+         "id": 56,
+         "options": {
+            "showValue": "never"
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+               },
+               "expr": "max by (instance) (\n  vault_health_status_code{\n    job=~\".*vault.*\"\n\n  }\n)\n",
+               "legendFormat": "{{ instance }}"
+            }
+         ],
+         "title": "Node Health Status",
+         "type": "state-timeline"
+      },
+      {
+         "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+         },
+         "description": "Whether the /v1/sys/health probe got an HTTP response, regardless of status code.",
+         "fieldConfig": {
+            "defaults": {
+               "color": {
+                  "fixedColor": "text",
+                  "mode": "fixed"
+               },
+               "mappings": [
+                  {
+                     "options": {
+                        "0": {
+                           "color": "red",
+                           "index": 0,
+                           "text": "Unreachable"
+                        },
+                        "1": {
+                           "color": "green",
+                           "index": 1,
+                           "text": "Reachable"
+                        }
+                     },
+                     "type": "value"
+                  }
+               ]
+            }
+         },
+         "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 156
+         },
+         "id": 57,
+         "options": {
+            "showValue": "never"
+         },
+         "pluginVersion": "v11.4.0",
+         "targets": [
+            {
+               "datasource": {
+                  "type": "prometheus",
+                  "uid": "$datasource"
+               },
+               "expr": "min by (instance) (\n  vault_health_up{\n    job=~\".*vault.*\"\n\n  }\n)\n",
+               "legendFormat": "{{ instance }}"
+            }
+         ],
+         "title": "Health Probe Reachability",
+         "type": "state-timeline"
       }
    ],
    "schemaVersion": 39,

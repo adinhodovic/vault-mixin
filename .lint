@@ -10,3 +10,16 @@ exclusions:
     reason: TODO(adinhodovic)
   target-instance-rule:
   target-rate-interval-rule:
+  target-job-rule:
+    reason: Health probe series come from the prober's job, filtered by healthProbe.selector.
+    entries:
+      - dashboard: Vault / Overview
+        panel: Sealed Nodes
+      - dashboard: Vault / Overview
+        panel: Uninitialized Nodes
+      - dashboard: Vault / Overview
+        panel: Unreachable Nodes
+      - dashboard: Vault / Overview
+        panel: Node Health Status
+      - dashboard: Vault / Overview
+        panel: Health Probe Reachability

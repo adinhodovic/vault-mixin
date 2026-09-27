@@ -555,7 +555,6 @@ local prometheus = g.query.prometheus;
               %(health)s
             } == 503
           )
-          or vector(0)
         ||| % healthFilters,
 
         healthUninitializedNodes: |||
@@ -564,7 +563,6 @@ local prometheus = g.query.prometheus;
               %(health)s
             } == 501
           )
-          or vector(0)
         ||| % healthFilters,
 
         healthUnreachableNodes: |||
@@ -573,7 +571,6 @@ local prometheus = g.query.prometheus;
               %(health)s
             } == 0
           )
-          or vector(0)
         ||| % healthFilters,
 
         healthStatusByInstance: |||

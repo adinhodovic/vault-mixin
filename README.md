@@ -103,7 +103,6 @@ Either rename your probe metrics to these names, or point the mixin at the names
 {
   _config+:: {
     healthProbe+: {
-      dashboardEnabled: true,
       selector: 'job="vault-health"',
       statusCodeMetric: 'probe_http_status_code',
       upMetric: 'probe_success',
@@ -112,7 +111,7 @@ Either rename your probe metrics to these names, or point the mixin at the names
 }
 ```
 
-The `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts are always generated and stay silent until probe series exist. `dashboardEnabled` adds a Health Probe row to the overview dashboard with per-node state timelines.
+The `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts and the Health Probe dashboard row stay empty until probe series exist. Set `healthProbe.dashboardEnabled: false` to hide the row.
 
 ## Runtime metrics
 
