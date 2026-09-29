@@ -1098,7 +1098,7 @@ local prometheus = g.query.prometheus;
         [
           row.new('Raft Storage') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(68) +
+          row.gridPos.withY(60) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1111,12 +1111,12 @@ local prometheus = g.query.prometheus;
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=69
+          startY=61
         ) +
         [
           row.new('Requests') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(85) +
+          row.gridPos.withY(77) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1129,12 +1129,12 @@ local prometheus = g.query.prometheus;
           ],
           panelWidth=12,
           panelHeight=8,
-          startY=86
+          startY=78
         ) +
         [
           row.new('Tokens') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(102) +
+          row.gridPos.withY(94) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1144,14 +1144,14 @@ local prometheus = g.query.prometheus;
             panels.tokensByAuthTimeSeries,
             panels.tokenOperationsTimeSeries,
           ],
-          panelWidth=12,
+          panelWidth=8,
           panelHeight=8,
-          startY=103
+          startY=95
         ) +
         [
-          row.new('Audit') +
+          row.new('Audit & Policy') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(119) +
+          row.gridPos.withY(103) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1159,30 +1159,16 @@ local prometheus = g.query.prometheus;
           [
             panels.auditRequestsTimeSeries,
             panels.auditFailuresTimeSeries,
-          ],
-          panelWidth=12,
-          panelHeight=8,
-          startY=120
-        ) +
-        [
-          row.new('Policy') +
-          row.gridPos.withX(0) +
-          row.gridPos.withY(129) +
-          row.gridPos.withW(24) +
-          row.gridPos.withH(1),
-        ] +
-        grid.wrapPanels(
-          [
             panels.policyGetRateTimeSeries,
           ],
-          panelWidth=12,
+          panelWidth=8,
           panelHeight=8,
-          startY=130
+          startY=104
         ) +
         [
           row.new('Runtime') +
           row.gridPos.withX(0) +
-          row.gridPos.withY(138) +
+          row.gridPos.withY(112) +
           row.gridPos.withW(24) +
           row.gridPos.withH(1),
         ] +
@@ -1197,14 +1183,14 @@ local prometheus = g.query.prometheus;
           ],
           panelWidth=8,
           panelHeight=6,
-          startY=139
+          startY=113
         ) +
         (
           if $._config.healthProbe.enabled then
             [
               row.new('Health Probe') +
               row.gridPos.withX(0) +
-              row.gridPos.withY(151) +
+              row.gridPos.withY(125) +
               row.gridPos.withW(24) +
               row.gridPos.withH(1),
             ] +
@@ -1216,7 +1202,7 @@ local prometheus = g.query.prometheus;
               ],
               panelWidth=8,
               panelHeight=4,
-              startY=152
+              startY=126
             ) +
             grid.wrapPanels(
               [
@@ -1224,7 +1210,7 @@ local prometheus = g.query.prometheus;
               ],
               panelWidth=24,
               panelHeight=8,
-              startY=156
+              startY=130
             )
           else []
         );
