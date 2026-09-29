@@ -19,6 +19,20 @@
     vaultClusterLabel: if this.showMultiCluster then 'exported_cluster' else 'cluster',
     vaultNamespaceLabel: if this.showMultiCluster then 'exported_namespace' else 'namespace',
 
+    // blackbox_exporter probing of /v1/sys/health. When /v1/sys/metrics
+    // requires a token, sealed nodes fail the scrape and only show `up == 0`.
+    // The health endpoint needs no token and returns the node state as an HTTP
+    // status code: 200 active, 429 standby, 472 DR secondary, 473 performance
+    // standby, 501 uninitialized, 503 sealed. Enables the health alerts and
+    // the Health Probe dashboard row.
+    healthProbe: {
+      enabled: false,
+      // Selects the blackbox_exporter probe series for Vault.
+      selector: this.vaultSelector,
+      // HTTP status code returned by /v1/sys/health, 0 when unreachable.
+      statusCodeMetric: 'probe_http_status_code',
+    },
+
     grafanaUrl: 'https://grafana.com',
 
     dashboardIds: {
@@ -79,6 +93,25 @@
         severity: 'warning',
         interval: '5m',
         threshold: '0',
+      },
+
+      // The alerts below require healthProbe.enabled.
+      nodeSealed: {
+        enabled: true,
+        severity: 'critical',
+        interval: '1m',
+      },
+
+      nodeUninitialized: {
+        enabled: true,
+        severity: 'warning',
+        interval: '5m',
+      },
+
+      instanceUnreachable: {
+        enabled: true,
+        severity: 'critical',
+        interval: '2m',
       },
     },
 

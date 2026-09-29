@@ -46,3 +46,24 @@ rule {
   }
   disable = ["promql/regexp"]
 }
+
+rule {
+  match {
+    name = "VaultNodeSealed"
+  }
+  disable = ["promql/regexp"]
+}
+
+rule {
+  match {
+    name = "VaultNodeUninitialized"
+  }
+  disable = ["promql/regexp"]
+}
+
+rule {
+  match {
+    name = "VaultInstanceUnreachable"
+  }
+  disable = ["promql/regexp"]
+}
