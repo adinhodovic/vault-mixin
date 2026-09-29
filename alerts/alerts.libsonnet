@@ -224,7 +224,7 @@
                  },
                  annotations: {
                    summary: 'Vault node is sealed.',
-                   description: 'Vault instance {{ $labels.instance }} is reachable but sealed (/v1/sys/health returned HTTP 503) for the past %(interval)s.' % $._config.alerts.nodeSealed,
+                   description: 'Vault instance {{ $labels.%(instanceLabel)s }} is reachable but sealed (/v1/sys/health returned HTTP 503) for the past %(interval)s.' % ($._config.alerts.nodeSealed { instanceLabel: $._config.healthProbe.instanceLabel }),
                    dashboard_url: healthDashboardUrl,
                  },
                },
@@ -241,7 +241,7 @@
                  },
                  annotations: {
                    summary: 'Vault node is uninitialized.',
-                   description: 'Vault instance {{ $labels.instance }} is running but uninitialized (/v1/sys/health returned HTTP 501) for the past %(interval)s.' % $._config.alerts.nodeUninitialized,
+                   description: 'Vault instance {{ $labels.%(instanceLabel)s }} is running but uninitialized (/v1/sys/health returned HTTP 501) for the past %(interval)s.' % ($._config.alerts.nodeUninitialized { instanceLabel: $._config.healthProbe.instanceLabel }),
                    dashboard_url: healthDashboardUrl,
                  },
                },
@@ -258,7 +258,7 @@
                  },
                  annotations: {
                    summary: 'Vault instance is unreachable.',
-                   description: 'Vault instance {{ $labels.instance }} has not answered /v1/sys/health probes for the past %(interval)s.' % $._config.alerts.instanceUnreachable,
+                   description: 'Vault instance {{ $labels.%(instanceLabel)s }} has not answered /v1/sys/health probes for the past %(interval)s.' % ($._config.alerts.instanceUnreachable { instanceLabel: $._config.healthProbe.instanceLabel }),
                    dashboard_url: healthDashboardUrl,
                  },
                },

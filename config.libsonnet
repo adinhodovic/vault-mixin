@@ -31,6 +31,8 @@
       selector: this.vaultSelector,
       // HTTP status code returned by /v1/sys/health, 0 when unreachable.
       statusCodeMetric: 'probe_http_status_code',
+      // Label identifying the probed node, used in alerts and the dashboard.
+      instanceLabel: 'instance',
     },
 
     grafanaUrl: 'https://grafana.com',

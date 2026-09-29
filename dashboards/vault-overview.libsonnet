@@ -29,6 +29,7 @@ local prometheus = g.query.prometheus;
       local defaultFilters = util.filters($._config);
       local healthFilters = defaultFilters {
         statusCodeMetric: $._config.healthProbe.statusCodeMetric,
+        instanceLabel: $._config.healthProbe.instanceLabel,
       };
       local queries = {
         // Summary
@@ -573,7 +574,7 @@ local prometheus = g.query.prometheus;
         ||| % healthFilters,
 
         healthStatusByInstance: |||
-          max by (instance) (
+          max by (%(instanceLabel)s) (
             %(statusCodeMetric)s{
               %(health)s
             }
@@ -997,7 +998,7 @@ local prometheus = g.query.prometheus;
           stateTimeline.queryOptions.withDatasource('prometheus', '$datasource') +
           stateTimeline.queryOptions.withTargets([
             prometheus.new('$datasource', queries.healthStatusByInstance) +
-            prometheus.withLegendFormat('{{ instance }}'),
+            prometheus.withLegendFormat('{{ %s }}' % $._config.healthProbe.instanceLabel),
           ]) +
           stateTimeline.options.withShowValue('never') +
           stateTimeline.standardOptions.color.withMode('fixed') +

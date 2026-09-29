@@ -117,7 +117,7 @@ Then enable the health alerts and dashboard row, pointing the selector at the pr
 }
 ```
 
-This adds the `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts and a Health Probe row on the overview dashboard. The mixin reads `probe_http_status_code`, which is `0` when the probe gets no response; override `healthProbe.statusCodeMetric` if your prober uses another metric name.
+This adds the `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts and a Health Probe row on the overview dashboard. The mixin reads `probe_http_status_code`, which is `0` when the probe gets no response; override `healthProbe.statusCodeMetric` if your prober uses another metric name, and `healthProbe.instanceLabel` to identify nodes by a label other than `instance`.
 
 ## Runtime metrics
 
