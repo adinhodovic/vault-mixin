@@ -41,6 +41,16 @@ local query = variable.query;
       %(exportedCluster)s
     ||| % this,
 
+    // Filter set for /v1/sys/health probe series. These come from the probing
+    // job rather than the Vault scrape, so the job/instance variables do not
+    // apply.
+    health: if config.showMultiCluster then |||
+      %(selector)s,
+      %(cluster)s
+    ||| % (this { selector: config.healthProbe.selector }) else |||
+      %(selector)s
+    ||| % config.healthProbe,
+
     // Filter set for metrics that carry both Vault's `cluster` and `namespace`
     // labels (vault_token_count_by_auth, vault_token_count_by_ttl). Adds both
     // exported_cluster and exported_namespace.
