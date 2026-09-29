@@ -23,9 +23,9 @@
     // requires a token, sealed nodes fail the scrape and only show `up == 0`.
     // The health endpoint needs no token and returns the node state as an HTTP
     // status code: 200 active, 429 standby, 472 DR secondary, 473 performance
-    // standby, 501 uninitialized, 503 sealed. Enables the health alerts and
-    // the Health Probe dashboard row.
+    // standby, 501 uninitialized, 503 sealed.
     healthProbe: {
+      // Adds the health alerts and the Health Probe dashboard row.
       enabled: false,
       // Selects the blackbox_exporter probe series for Vault.
       selector: this.vaultSelector,
@@ -51,7 +51,8 @@
       enabled: true,
 
       sealed: {
-        enabled: true,
+        // VaultNodeSealed replaces this when health probing is enabled.
+        enabled: !this.healthProbe.enabled,
         severity: 'critical',
         interval: '0m',
       },

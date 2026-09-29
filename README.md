@@ -81,7 +81,7 @@ spec:
 
 ## Health probing
 
-With `unauthenticated_metrics_access = true`, sealed nodes keep serving `/v1/sys/metrics` and report `vault_core_unsealed = 0`, so `VaultSealed` covers them. When the metrics endpoint requires a token, a sealed node fails the scrape and only shows up as `up == 0`, the same as a dead node.
+With `unauthenticated_metrics_access = true`, sealed nodes keep serving `/v1/sys/metrics` and report `vault_core_unsealed = 0`, so `VaultSealed` covers them. Vault stops refreshing that gauge while sealed, so it drops out of the metrics after `prometheus_retention_time` (24h by default). When the metrics endpoint requires a token, a sealed node fails the scrape and only shows up as `up == 0`, the same as a dead node.
 
 For that setup, probe `/v1/sys/health` with [blackbox_exporter](https://github.com/prometheus/blackbox_exporter). The endpoint needs no token and reports the node state as an HTTP status code:
 
@@ -117,7 +117,11 @@ Then enable the health alerts and dashboard row, pointing the selector at the pr
 }
 ```
 
-This adds the `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts and a Health Probe row on the overview dashboard. The mixin reads `probe_http_status_code`, which is `0` when the probe gets no response; override `healthProbe.statusCodeMetric` if your prober uses another metric name, and `healthProbe.instanceLabel` to identify nodes by a label other than `instance`.
+This adds the `VaultNodeSealed`, `VaultNodeUninitialized` and `VaultInstanceUnreachable` alerts and a Health Probe row on the overview dashboard. Other settings:
+
+- `alerts.sealed.enabled`: defaults to `false` in this mode because `VaultNodeSealed` replaces `VaultSealed`. Set it to `true` to keep both.
+- `healthProbe.statusCodeMetric`: defaults to `probe_http_status_code`, which is `0` when the probe gets no response. Override it if your prober uses another metric name.
+- `healthProbe.instanceLabel`: defaults to `instance`. Set it to identify nodes by another label.
 
 ## Runtime metrics
 
