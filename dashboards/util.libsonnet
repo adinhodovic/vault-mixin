@@ -99,9 +99,9 @@ local query = variable.query;
       query.new(
         'namespace',
         if config.showMultiCluster then
-          'label_values(up{%(vaultSelector)s, %(cluster)s}, namespace)' % (config { cluster: defaultFilters.cluster })
+          'label_values(vault_core_unsealed{%(vaultSelector)s, %(cluster)s}, namespace)' % (config { cluster: defaultFilters.cluster })
         else
-          'label_values(up{%(vaultSelector)s}, namespace)' % config,
+          'label_values(vault_core_unsealed{%(vaultSelector)s}, namespace)' % config,
       ) +
       query.withDatasourceFromVariable(this.datasource) +
       query.withSort() +
@@ -115,9 +115,9 @@ local query = variable.query;
       query.new(
         'job',
         if config.showMultiCluster then
-          'label_values(up{%(vaultSelector)s, %(cluster)s, %(namespace)s}, job)' % (config { cluster: defaultFilters.cluster, namespace: defaultFilters.namespace })
+          'label_values(vault_core_unsealed{%(vaultSelector)s, %(cluster)s, %(namespace)s}, job)' % (config { cluster: defaultFilters.cluster, namespace: defaultFilters.namespace })
         else
-          'label_values(up{%(vaultSelector)s}, job)' % config,
+          'label_values(vault_core_unsealed{%(vaultSelector)s}, job)' % config,
       ) +
       query.withDatasourceFromVariable(this.datasource) +
       query.withSort() +
@@ -163,9 +163,9 @@ local query = variable.query;
       query.new(
         'instance',
         if config.showMultiCluster then
-          'label_values(up{%(cluster)s, %(namespace)s, %(job)s}, instance)' % (config { cluster: defaultFilters.cluster, namespace: defaultFilters.namespace, job: defaultFilters.job })
+          'label_values(vault_core_unsealed{%(cluster)s, %(namespace)s, %(job)s}, instance)' % (config { cluster: defaultFilters.cluster, namespace: defaultFilters.namespace, job: defaultFilters.job })
         else
-          'label_values(up{%(job)s}, instance)' % (config { job: defaultFilters.job }),
+          'label_values(vault_core_unsealed{%(job)s}, instance)' % (config { job: defaultFilters.job }),
       ) +
       query.withDatasourceFromVariable(this.datasource) +
       query.withSort() +

@@ -2389,7 +2389,7 @@
             "label": "Namespace",
             "multi": true,
             "name": "namespace",
-            "query": "label_values(up{job=~\".*vault.*\"}, namespace)",
+            "query": "label_values(vault_core_unsealed{job=~\".*vault.*\"}, namespace)",
             "refresh": 2,
             "sort": 1,
             "type": "query"
@@ -2403,7 +2403,7 @@
             "label": "Job",
             "multi": true,
             "name": "job",
-            "query": "label_values(up{job=~\".*vault.*\"}, job)",
+            "query": "label_values(vault_core_unsealed{job=~\".*vault.*\"}, job)",
             "refresh": 2,
             "sort": 1,
             "type": "query"
@@ -2445,7 +2445,7 @@
             "label": "Instance",
             "multi": true,
             "name": "instance",
-            "query": "label_values(up{job=~\"$job\"}, instance)",
+            "query": "label_values(vault_core_unsealed{job=~\"$job\"}, instance)",
             "refresh": 2,
             "sort": 1,
             "type": "query"
