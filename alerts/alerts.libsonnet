@@ -2,7 +2,7 @@
   local clusterVariableQueryString = if $._config.showMultiCluster then '&var-%(clusterLabel)s={{ $labels.%(clusterLabel)s }}' % $._config else '',
   local instanceGroupLabels = if $._config.showMultiCluster then '%(clusterLabel)s, job, instance' % $._config else 'job, instance',
   local healthDashboardUrl = $._config.dashboardUrls['vault-overview'] + (if $._config.showMultiCluster then '?var-%(clusterLabel)s={{ $labels.%(clusterLabel)s }}' % $._config else ''),
-  local vaultClusterGroupLabels = '%(vaultClusterLabel)s' % $._config,
+  local vaultClusterGroupLabels = if $._config.showMultiCluster then '%(clusterLabel)s, %(vaultClusterLabel)s' % $._config else '%(vaultClusterLabel)s' % $._config,
   prometheusAlerts+:: {
     groups+: [
       {
