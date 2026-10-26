@@ -41,7 +41,15 @@ local prometheus = g.query.prometheus;
           )
         ||| % defaultFilters,
 
-        nodes: |||
+        // Probe targets persist when Vault is stopped, while
+        // vault_core_unsealed disappears with the scrape.
+        nodes: if $._config.healthProbe.enabled then |||
+          count(
+            %(statusCodeMetric)s{
+              %(health)s
+            }
+          )
+        ||| % healthFilters else |||
           count(
             vault_core_unsealed{
               %(clustered)s
